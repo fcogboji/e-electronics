@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  amount    Float
+  products  Json
+  createdAt DateTime @default(now())
+  status    String   @default("Pending")
+}
+
+model Product {
+  id           String     @id @default(cuid())
+  name         String
+  price        Int
+  image        String
+  description  String
+  brand        String
+  category     String
+  discount     Int?
+  createdAt    DateTime   @default(now())
+  wishlists    Wishlist[]
+  stock        Int        @default(0)
+  reviews      Review[] // One-to-many relationship with reviews
+  avgRating    Float? // Cached average rating for performance
+  totalReviews Int        @default(0) // Cached total review count
+}
+
+model ReturnRequest {
+  id        String   @id @default(cuid())
+  orderId   String
+  reason    String
+  details   String?
+  userId    String
+  createdAt DateTime @default(now())
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
+}
+
+// =============================================================================
+// 1. DATABASE SCHEMA (schema.prisma)
+// =============================================================================
+
+// Review model to store individual reviews and ratings
+model Review {
+  id        String   @id @default(cuid()) // Unique identifier for each review
+  rating    Int // Rating value (1-5 stars)
+  comment   String? // Optional text comment from user
+  userId    String // Clerk user ID who wrote the review
+  productId String // ID of the product being reviewed
+  createdAt DateTime @default(now()) // Timestamp when review was created
+  updatedAt DateTime @updatedAt // Timestamp when review was last updated
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade) // Link to product
+
+  // Ensure one review per user per product
+  @@unique([userId, productId])
+  @@map("reviews") // Table name in database
+}
