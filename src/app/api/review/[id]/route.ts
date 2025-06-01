@@ -1,8 +1,7 @@
-// app/api/reviews/[id]/route.ts
 import { prisma } from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: any) {
   const { userId } = await auth();
   if (!userId) return new Response('Unauthorized', { status: 401 });
 
@@ -22,7 +21,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   return Response.json(updated);
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: any) {
   const { userId } = await auth();
   if (!userId) return new Response('Unauthorized', { status: 401 });
 
