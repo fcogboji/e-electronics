@@ -4,11 +4,16 @@ import { getProductsByBrand } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { Metadata } from "next";
 
-// ✅ Use inline type instead of type alias
+interface BrandPageProps {
+  params: {
+    brand: string;
+  };
+}
+
 export async function generateMetadata(
-  { params }: { params: { brand: string } }
+  context: BrandPageProps
 ): Promise<Metadata> {
-  const brand = decodeURIComponent(params.brand);
+  const brand = decodeURIComponent(context.params.brand);
   return {
     title: `${brand} Products | YourSiteName`,
     description: `Discover top ${brand} products available at YourSiteName.`,
@@ -34,9 +39,7 @@ export async function generateMetadata(
   };
 }
 
-export default async function BrandPage(
-  { params }: { params: { brand: string } }
-) {
+export default async function BrandPage({ params }: BrandPageProps) {
   const brand = decodeURIComponent(params.brand);
   const products = await getProductsByBrand(brand);
 
