@@ -4,8 +4,10 @@ import { getProductsByBrand } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { Metadata } from "next";
 
-// ✅ Use correct inline typing here:
-export async function generateMetadata({ params }: { params: { brand: string } }): Promise<Metadata> {
+// ✅ Use inline type instead of type alias
+export async function generateMetadata(
+  { params }: { params: { brand: string } }
+): Promise<Metadata> {
   const brand = decodeURIComponent(params.brand);
   return {
     title: `${brand} Products | YourSiteName`,
@@ -32,16 +34,15 @@ export async function generateMetadata({ params }: { params: { brand: string } }
   };
 }
 
-// ✅ Don't use a separate type alias; inline typing works better with Next.js 15
-export default async function BrandPage({ params }: { params: { brand: string } }) {
+export default async function BrandPage(
+  { params }: { params: { brand: string } }
+) {
   const brand = decodeURIComponent(params.brand);
   const products = await getProductsByBrand(brand);
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-3xl font-bold mb-6 capitalize">
-        {brand} Products
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 capitalize">{brand} Products</h1>
 
       {products.length === 0 ? (
         <div className="text-center text-gray-500 text-lg">
