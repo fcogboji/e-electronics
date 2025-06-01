@@ -3,11 +3,11 @@ import RatingStats from '@/components/StarRating';
 import ReviewsSection from '@/components/ReviewsSection';
 
 interface PageProps {
-  params: { productId: string };
+  params: Promise<{ productId: string }>;
 }
 
 export default async function ReviewsRatingPage({ params }: PageProps) {
-  const { productId } = params;
+  const { productId } = await params;
   const { stats } = await getReviews(productId);
 
   return (
