@@ -4,11 +4,12 @@ import { getProductsByBrand } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { Metadata } from "next";
 
+// ✅ Use correct inline typing here:
 export async function generateMetadata({ params }: { params: { brand: string } }): Promise<Metadata> {
   const brand = decodeURIComponent(params.brand);
   return {
     title: `${brand} Products | YourSiteName`,
-    description: `Discover top ${brand} products available at YourSiteName. Shop high-quality electronics, appliances, and more from ${brand}.`,
+    description: `Discover top ${brand} products available at YourSiteName.`,
     openGraph: {
       title: `${brand} Products | YourSiteName`,
       description: `Browse the latest and best ${brand} products available in our store.`,
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: { params: { brand: string } }
   };
 }
 
+// ✅ Don't use a separate type alias; inline typing works better with Next.js 15
 export default async function BrandPage({ params }: { params: { brand: string } }) {
   const brand = decodeURIComponent(params.brand);
   const products = await getProductsByBrand(brand);
