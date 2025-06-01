@@ -4,11 +4,7 @@ import { getProductsByBrand } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { Metadata } from "next";
 
-type Props = {
-  params: { brand: string };
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { brand: string } }): Promise<Metadata> {
   const brand = decodeURIComponent(params.brand);
   return {
     title: `${brand} Products | YourSiteName`,
@@ -20,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'YourSiteName',
       images: [
         {
-          url: `https://www.yoursite.com/images/brands/${brand.toLowerCase()}.jpg`, // optional, update as needed
+          url: `https://www.yoursite.com/images/brands/${brand.toLowerCase()}.jpg`,
           width: 800,
           height: 600,
         },
@@ -35,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function BrandPage({ params }: Props) {
+export default async function BrandPage({ params }: { params: { brand: string } }) {
   const brand = decodeURIComponent(params.brand);
   const products = await getProductsByBrand(brand);
 
