@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware } from '@/lib/authMiddleware'; // Your auth utility
-import { prisma } from '@/lib/prisma'; // Your Prisma client
+import { authMiddleware } from '@/lib/authMiddleware';
+import { prisma } from '@/lib/prisma';
 
-type Context = {
-  params: { id: string };
-};
-
-export async function GET(req: NextRequest, context: Context) {
+export async function GET(req: NextRequest, { params }: any) {
+  const { id } = params;
   try {
     const product = await prisma.product.findUnique({
-      where: { id: context.params.id },
+      where: { id },
     });
 
     if (!product) {
@@ -22,9 +19,10 @@ export async function GET(req: NextRequest, context: Context) {
   }
 }
 
-export async function PUT(req: NextRequest, context: Context) {
+export async function PUT(req: NextRequest, { params }: any) {
+  const { id } = params;
   try {
-    const userId = await authMiddleware(req); // Protect the route
+    const userId = await authMiddleware(req);
 
     const body = await req.json();
     const { name, price, image, description, category, discount, stock } = body;
@@ -42,16 +40,8 @@ export async function PUT(req: NextRequest, context: Context) {
     }
 
     const updated = await prisma.product.update({
-      where: { id: context.params.id },
-      data: {
-        name,
-        price,
-        image,
-        description,
-        category,
-        discount,
-        stock,
-      },
+      where: { id },
+      data: { name, price, image, description, category, discount, stock },
     });
 
     return NextResponse.json(updated);
@@ -60,13 +50,12 @@ export async function PUT(req: NextRequest, context: Context) {
   }
 }
 
-export async function DELETE(req: NextRequest, context: Context) {
+export async function DELETE(req: NextRequest, { params }: any) {
+  const { id } = params;
   try {
-    const userId = await authMiddleware(req); // Protect the route
+    const userId = await authMiddleware(req);
 
-    await prisma.product.delete({
-      where: { id: context.params.id },
-    });
+    await prisma.product.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Product deleted successfully' });
   } catch (error) {
