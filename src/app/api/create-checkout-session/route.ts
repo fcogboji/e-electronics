@@ -1,3 +1,6 @@
+// 🚨 Prevents Next.js from trying to pre-render this API route at build time
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from "@/lib/prisma";
@@ -19,14 +22,13 @@ export async function POST(req: NextRequest) {
       });
 
       if (!product || product.stock < item.quantity) {
-  return new NextResponse(
-    JSON.stringify({
-      error: `${item.name} only has ${product?.stock || 0} in stock.`,
-    }),
-    { status: 400, headers: { 'Content-Type': 'application/json' } }
-  );
-}
-
+        return new NextResponse(
+          JSON.stringify({
+            error: `${item.name} only has ${product?.stock || 0} in stock.`,
+          }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // 💳 Step 2: Create Stripe checkout session
@@ -52,13 +54,13 @@ export async function POST(req: NextRequest) {
       }),
       success_url: `${req.nextUrl.origin}/success`,
       cancel_url: `${req.nextUrl.origin}/cart`,
-
-      // ✅ Metadata to help webhook reduce stock
       metadata: {
-        cartItems: JSON.stringify(cartItems.map((item: any) => ({
-          id: item.id,
-          quantity: item.quantity,
-        }))),
+        cartItems: JSON.stringify(
+          cartItems.map((item: any) => ({
+            id: item.id,
+            quantity: item.quantity,
+          }))
+        ),
       },
     });
 
