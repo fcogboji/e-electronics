@@ -1,21 +1,28 @@
+// src/app/product/[id]/page.tsx
+
 import { prisma } from '@/lib/prisma';
 import ProductDetails from './ProductDetails';
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
+interface ProductPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params;
+
   const product = await prisma.product.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!product) return <div>Product not found</div>;
 
- return (
-  <ProductDetails
-    product={{
-      ...product,
-      discount: product.discount ?? 0, // ensure number
-     avgRating: product.avgRating ?? null, // ✅ Correct - converts to null
-    }}
-  />
-);
-
+  return (
+    <ProductDetails
+      product={{
+        ...product,
+        discount: product.discount ?? 0,
+        avgRating: product.avgRating ?? null,
+      }}
+    />
+  );
 }
