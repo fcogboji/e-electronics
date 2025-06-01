@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authMiddleware } from '@/lib/authMiddleware'; // Your auth utility
 import { prisma } from '@/lib/prisma'; // Your Prisma client
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+type Context = {
+  params: { id: string };
+};
+
+export async function GET(req: NextRequest, context: Context) {
   try {
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id: context.params.id },
     });
 
     if (!product) {
@@ -18,12 +22,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: Context) {
   try {
     const userId = await authMiddleware(req); // Protect the route
 
     const body = await req.json();
-
     const { name, price, image, description, category, discount, stock } = body;
 
     if (
@@ -39,7 +42,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const updated = await prisma.product.update({
-      where: { id: params.id },
+      where: { id: context.params.id },
       data: {
         name,
         price,
@@ -47,7 +50,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         description,
         category,
         discount,
-        stock, // ✅ Update the stock field here
+        stock,
       },
     });
 
@@ -57,12 +60,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: Context) {
   try {
     const userId = await authMiddleware(req); // Protect the route
 
     await prisma.product.delete({
-      where: { id: params.id },
+      where: { id: context.params.id },
     });
 
     return NextResponse.json({ message: 'Product deleted successfully' });
