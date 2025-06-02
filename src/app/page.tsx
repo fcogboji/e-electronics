@@ -1,8 +1,10 @@
+export const dynamic = 'force-dynamic'; // 👈 add this
+
 import ProductCard from '@/components/ProductCard';
 import { prisma } from '@/lib/prisma';
 import BrandCarousel from "@/components/BrandCarousel";
 
-export const dynamic = 'force-dynamic'; // 👈 add this
+
 
 export default async function HomePage() {
   const products = await prisma.product.findMany();
