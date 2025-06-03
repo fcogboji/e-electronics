@@ -43,3 +43,20 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+@keyframes flash {
+  0%, 100% { box-shadow: 0 0 10px 3px rgba(255,255,255,0.6); }
+  50% { box-shadow: 0 0 30px 8px rgba(255,255,255,1); }
+}
+
+.animate-blink {
+  animation: blink 1.5s infinite;
+}
+
+.animate-flash {
+  animation: flash 2.5s infinite;
+}

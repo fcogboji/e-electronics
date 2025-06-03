@@ -163,7 +163,7 @@ export default function Navbar() {
       </div>
 
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-4 py-3 bg-white shadow-md z-40 relative">
+      <nav className="flex items-center justify-between px-4 py-3 bg-red-200 shadow-md z-40 relative">
         {/* Left: Hamburger and Logo */}
         <div className="flex items-center gap-4 w-1/3">
           <button onClick={() => setSidebarOpen(true)} className="block">

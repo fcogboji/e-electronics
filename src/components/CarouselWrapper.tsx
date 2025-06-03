@@ -1,20 +1,18 @@
-// src/components/CarouselWrapper.tsx
-'use client';
+'use client'
 
-import { usePathname } from 'next/navigation';
-import EmblaCarouselComponent from './EmblaCarouselComponent';
+import { usePathname } from 'next/navigation'
+import FadeCarousel from './EmblaCarouselComponent'
 
 const slides = [
-  { id: 1, imageUrl: '/images/slide1.jpg', alt: 'Fresh Vegetables' },
-  { id: 2, imageUrl: '/images/slide2.jpg', alt: 'Organic Fruits' },
-  { id: 3, imageUrl: '/images/slide3.jpg', alt: 'Local Farms' },
-];
+  { id: 1, imageUrl: '/images/car-promo.jpg', alt: 'image1' },
+  { id: 2, imageUrl: '/images/event.jpg', alt: 'image2' },
+  { id: 3, imageUrl: '/images/mi.jpg', alt: 'image3' },
+  { id: 4, imageUrl: '/images/sking-care.jpeg', alt: 'image4' },
+]
 
 export default function CarouselWrapper() {
-  const pathname = usePathname();
+  const pathname = usePathname()
+  const showCarousel = pathname === '/'
 
-  // Show only on homepage
-  const showCarousel = pathname === '/';
-
-  return showCarousel ? <EmblaCarouselComponent slides={slides} /> : null;
+  return showCarousel ? <FadeCarousel slides={slides} /> : null
 }
