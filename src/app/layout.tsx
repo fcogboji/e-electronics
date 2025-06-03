@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CarouselWrapper from '@/components/CarouselWrapper';
 import ToasterProvider from '@/components/ToasterProvider'; // ✅ Import this
+import ElectroShopBanner from '@/components/ElectroShopBanner';
 import './globals.css';
 
 export const metadata = {
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col">
         <ClerkProvider>
           <ToasterProvider /> {/* ✅ Only this is client-side */}
+          <ElectroShopBanner />
           <Navbar />
           <CarouselWrapper />
           <main className="flex-grow pt-20">{children}</main>
