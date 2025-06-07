@@ -120,6 +120,12 @@ export default function Navbar() {
                   Add Product
                 </Link>
               </li>
+                <li>
+                <Link href="/admin/orders" onClick={() => setSidebarOpen(false)} className="block px-2 py-1 hover:bg-gray-100 rounded">
+                  <PlusCircle className="inline mr-2" size={16} />
+                  admin Orders
+                </Link>
+              </li>
             </>
           )}
 

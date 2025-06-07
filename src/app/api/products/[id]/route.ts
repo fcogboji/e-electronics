@@ -1,64 +1,84 @@
+// /src/app/api/products/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware } from '@/lib/authMiddleware';
-import { prisma } from '@/lib/prisma';
+import { prisma } from "@/lib/prisma";
 
-export async function GET(req: NextRequest, { params }: any) {
-  const { id } = params;
+export async function GET(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Await the params Promise in Next.js 15
+  const { id } = await params;
+  
   try {
     const product = await prisma.product.findUnique({
       where: { id },
+      include: {
+        // Add any relations you need
+        reviews: true, // if you have reviews
+        // category: true, // if you have categories
+        // orderItems: true, // if needed
+      },
     });
 
     if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(product);
   } catch (error) {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    console.error("Error fetching product:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch product" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(req: NextRequest, { params }: any) {
-  const { id } = params;
+// If you have other HTTP methods, apply the same pattern:
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  
   try {
-    const userId = await authMiddleware(req);
-
     const body = await req.json();
-    const { name, price, image, description, category, discount, stock } = body;
-
-    if (
-      !name ||
-      !price ||
-      !image ||
-      !description ||
-      !category ||
-      !discount ||
-      typeof stock !== 'number'
-    ) {
-      return NextResponse.json({ error: 'Missing or invalid fields' }, { status: 400 });
-    }
-
-    const updated = await prisma.product.update({
+    
+    const updatedProduct = await prisma.product.update({
       where: { id },
-      data: { name, price, image, description, category, discount, stock },
+      data: body,
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json(updatedProduct);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
+    console.error("Error updating product:", error);
+    return NextResponse.json(
+      { error: "Failed to update product" },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: any) {
-  const { id } = params;
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  
   try {
-    const userId = await authMiddleware(req);
+    await prisma.product.delete({
+      where: { id },
+    });
 
-    await prisma.product.delete({ where: { id } });
-
-    return NextResponse.json({ message: 'Product deleted successfully' });
+    return NextResponse.json({ message: "Product deleted successfully" });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
+    console.error("Error deleting product:", error);
+    return NextResponse.json(
+      { error: "Failed to delete product" },
+      { status: 500 }
+    );
   }
 }

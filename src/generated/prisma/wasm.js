@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.8.2
- * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
+ * Prisma Client JS version: 6.9.0
+ * Query Engine version: 81e4af48011447c3cc503a190e86995b66d2a28e
  */
 Prisma.prismaVersion = {
-  client: "6.8.2",
-  engine: "2060c79ba17c6bb9f5823312b6f6b7f4a845738e"
+  client: "6.9.0",
+  engine: "81e4af48011447c3cc503a190e86995b66d2a28e"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -120,14 +120,9 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.OrderScalarFieldEnum = {
+exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
-  userId: 'userId',
-  email: 'email',
-  amount: 'amount',
-  products: 'products',
-  createdAt: 'createdAt',
-  status: 'status'
+  email: 'email'
 };
 
 exports.Prisma.ProductScalarFieldEnum = {
@@ -139,10 +134,35 @@ exports.Prisma.ProductScalarFieldEnum = {
   brand: 'brand',
   category: 'category',
   discount: 'discount',
-  createdAt: 'createdAt',
   stock: 'stock',
+  createdAt: 'createdAt',
   avgRating: 'avgRating',
   totalReviews: 'totalReviews'
+};
+
+exports.Prisma.OrderScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  email: 'email',
+  amount: 'amount',
+  status: 'status',
+  paymentIntentId: 'paymentIntentId',
+  createdAt: 'createdAt',
+  customerName: 'customerName',
+  phone: 'phone',
+  shippingAddress: 'shippingAddress',
+  city: 'city',
+  state: 'state',
+  postalCode: 'postalCode',
+  country: 'country'
+};
+
+exports.Prisma.OrderItemScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  productId: 'productId',
+  quantity: 'quantity',
+  price: 'price'
 };
 
 exports.Prisma.ReturnRequestScalarFieldEnum = {
@@ -176,19 +196,9 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
-exports.Prisma.JsonNullValueInput = {
-  JsonNull: Prisma.JsonNull
-};
-
 exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
-};
-
-exports.Prisma.JsonNullValueFilter = {
-  DbNull: Prisma.DbNull,
-  JsonNull: Prisma.JsonNull,
-  AnyNull: Prisma.AnyNull
 };
 
 exports.Prisma.NullsOrder = {
@@ -198,8 +208,10 @@ exports.Prisma.NullsOrder = {
 
 
 exports.Prisma.ModelName = {
-  Order: 'Order',
+  User: 'User',
   Product: 'Product',
+  Order: 'Order',
+  OrderItem: 'OrderItem',
   ReturnRequest: 'ReturnRequest',
   Wishlist: 'Wishlist',
   Review: 'Review'

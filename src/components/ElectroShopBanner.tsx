@@ -49,7 +49,7 @@ export default function ElectroShopBanner() {
         <style jsx>{`
           .banner {
             width: 100%;
-            height: 150px;
+            height: 70px;
             background: linear-gradient(45deg, #FFD700, #FFF700, #FFED4E, #FFFFFF);
             background-size: 400% 400%;
             animation: gradientShift 1s ease-in-out infinite;

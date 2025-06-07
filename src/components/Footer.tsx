@@ -84,14 +84,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-yellow-400">DOWNLOAD ELECTROSHOP FREE APP</h3>
             <p className="text-gray-300 mb-4">Get access to exclusive offers!</p>
-            <div className="space-y-3">
-              <a href="#" className="block">
-                <img src="https://via.placeholder.com/150x50/000000/FFFFFF?text=App+Store" alt="Download on App Store" className="h-12" />
-              </a>
-              <a href="#" className="block">
-                <img src="https://via.placeholder.com/150x50/000000/FFFFFF?text=Google+Play" alt="Get it on Google Play" className="h-12" />
-              </a>
-            </div>
+            
           </div>
 
           {/* Need Help Section */}
