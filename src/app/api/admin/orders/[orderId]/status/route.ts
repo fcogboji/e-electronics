@@ -1,14 +1,12 @@
-// app/api/admin/orders/[orderId]/status/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Record<string, string> }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const { orderId } = params;
+    const { orderId } = await params;
     const { status } = await req.json();
 
     if (!status) {
