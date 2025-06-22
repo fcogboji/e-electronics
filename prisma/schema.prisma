@@ -49,6 +49,12 @@ model Order {
   state           String?
   postalCode      String?
   country         String?
+    shippingProvider String?    // ✅ name of the courier (e.g. DHL, GIG)
+  trackingId       String?    // ✅ tracking number
+  deliveryEta      DateTime?  // ✅ estimated delivery date
+  adminNote        String?    // ✅ internal note only admins can see
+  
+
 
   user            User?       @relation("UserOrders", fields: [userId], references: [id]) // ✅ optional
   orderItems      OrderItem[]

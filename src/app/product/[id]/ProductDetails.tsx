@@ -61,11 +61,11 @@ export default function ProductDetails({ product }: { product: Product }) {
             <div className="flex items-center space-x-4">
               {validDiscount > 0 && (
                 <p className="line-through text-gray-500 text-lg">
-                  ₦{(product.price / 100).toLocaleString()}
+                  £{(product.price / 100).toLocaleString()}
                 </p>
               )}
               <p className="text-primary text-2xl font-bold">
-                ₦{(discountedPrice / 100).toLocaleString()}
+                £{(discountedPrice / 100).toLocaleString()}
               </p>
             </div>
 

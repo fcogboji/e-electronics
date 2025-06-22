@@ -1,91 +1,115 @@
-// /src/app/api/checkout/route.ts
+// File: /app/api/create-checkout-session/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
+import { currentUser } from '@clerk/nextjs/server';
 
-// Initialize Stripe client with secret key and API version
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-05-28.basil',
 });
 
-// POST handler for creating a Stripe checkout session
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  discount?: number;
+}
+
+interface CustomerInfo {
+  email?: string;
+  name?: string;
+  phone?: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { cartItems, customerInfo } = body;
+    const user = await currentUser();
+    
+    if (!user) {
+      return NextResponse.json({ error: 'You must be signed in to checkout.' }, { status: 401 });
+    }
 
-    // Check if all cart items have sufficient stock before proceeding
+    // ✅ Validate user ID exists and is not empty
+    if (!user.id || user.id.trim() === '') {
+      console.error('❌ Invalid user ID:', user.id);
+      return NextResponse.json({ error: 'Invalid user session' }, { status: 401 });
+    }
+
+    const { cartItems, customerInfo }: {
+      cartItems: CartItem[];
+      customerInfo?: CustomerInfo;
+    } = await req.json();
+
+    if (!cartItems?.length) {
+      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
+    }
+
+    // Validate stock
     for (const item of cartItems) {
-      const product = await prisma.product.findUnique({ where: { id: item.id } });
-
-      if (!product || product.stock < item.quantity) {
-        return new NextResponse(JSON.stringify({ error: `${item.name} is out of stock.` }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        });
+      const dbProduct = await prisma.product.findUnique({ where: { id: item.id } });
+      if (!dbProduct || dbProduct.stock < item.quantity) {
+        return NextResponse.json({ error: `${item.name} is out of stock` }, { status: 400 });
       }
     }
 
-    // Calculate the total amount including discounts
-    const totalAmount = cartItems.reduce((total: number, item: any) => {
-      const finalPrice = item.discount
+    const lineItems = cartItems.map((item) => {
+      const price = item.discount
         ? item.price * (1 - item.discount / 100)
         : item.price;
-      return total + finalPrice * item.quantity;
+      
+      return {
+        price_data: {
+        currency: 'GBP',
+        product_data: { name: item.name },
+        unit_amount: price, // ✅ ALREADY in pence
+},
+
+        quantity: item.quantity,
+      };
+    });
+
+    const totalAmount = cartItems.reduce((sum, item) => {
+      const price = item.discount
+        ? item.price * (1 - item.discount / 100)
+        : item.price;
+      return sum + price * item.quantity;
     }, 0);
 
-    // Create a new Stripe checkout session
+    // ✅ Ensure all required fields are properly set
+    const metadata = {
+      cartItems: JSON.stringify(cartItems),
+      totalAmount: totalAmount.toFixed(2),
+      customerEmail: customerInfo?.email ?? user.emailAddresses?.[0]?.emailAddress ?? '',
+      customerName: customerInfo?.name ?? `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      customerPhone: customerInfo?.phone ?? '',
+      userId: user.id, // ✅ Already validated above
+      clerkUserId: user.id, // ✅ Add explicit clerk user ID for webhook
+    };
+
+    // ✅ Log metadata for debugging
+    console.log('✅ Creating checkout session with metadata:', {
+      userId: metadata.userId,
+      customerEmail: metadata.customerEmail,
+      totalAmount: metadata.totalAmount
+    });
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      line_items: cartItems.map((item: any) => {
-        const finalPrice = item.discount
-          ? item.price * (1 - item.discount / 100)
-          : item.price;
-
-        return {
-          price_data: {
-            currency: 'ngn',
-            product_data: {
-              name: item.name,
-              images: [item.image],
-            },
-            unit_amount: Math.round(finalPrice),
-          },
-          quantity: item.quantity,
-        };
-      }),
+      line_items: lineItems,
       success_url: `${req.nextUrl.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.nextUrl.origin}/cart`,
-      metadata: {
-        cartItems: JSON.stringify(cartItems.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          price: item.discount ? item.price * (1 - item.discount / 100) : item.price,
-          quantity: item.quantity,
-        }))),
-        totalAmount: totalAmount.toString(),
-        customerEmail: customerInfo?.email || '',
-        customerName: customerInfo?.name || '',
-        customerPhone: customerInfo?.phone || '',
-      },
+      customer_email: customerInfo?.email || user.emailAddresses?.[0]?.emailAddress,
       shipping_address_collection: {
-        allowed_countries: ['NG', 'US', 'GB', 'CA'],
+        allowed_countries: ['NG', 'US', 'GB', 'CA']
       },
-      ...(customerInfo?.email ? {} : {
-        customer_email: customerInfo?.email,
-      }),
+      metadata,
     });
 
     return NextResponse.json({ sessionUrl: session.url });
-  } catch (err) {
-    console.error('Stripe error:', err);
-    return new NextResponse(
-      JSON.stringify({ error: 'Something went wrong during checkout' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+  } catch (error) {
+    console.error('❌ create-checkout-session error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -93,7 +93,7 @@ export default function CheckoutPage() {
 
                 <div>
                   <h2 className="text-lg font-semibold">{item.name}</h2>
-                  <p>₦{(item.price / 100).toLocaleString()}</p>
+                  <p>£{(item.price / 100).toLocaleString()}</p>
                   <p>Qty: {item.quantity}</p>
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default function CheckoutPage() {
           </div>
 
           <p className="mt-4 text-right text-xl font-bold">
-            Total: ₦{(grandTotal / 100).toLocaleString()}
+            Total: £{(grandTotal / 100).toLocaleString()}
           </p>
 
           <div className="text-right mt-6">

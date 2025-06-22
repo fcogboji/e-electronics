@@ -1,231 +1,125 @@
+// File: /app/api/webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 
-// Initialize Stripe with latest supported API version
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-05-28.basil',
 });
-
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: NextRequest) {
-  const rawBody = await req.text();
-  const signature = req.headers.get('stripe-signature') as string;
   let event: Stripe.Event;
+  const rawBody = await req.text();
+  const sig = req.headers.get('stripe-signature')!;
 
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+    console.log(`✅ Verified webhook: ${event.id} (${event.type})`);
   } catch (err) {
-    console.error('❌ Invalid signature:', err);
-    return new NextResponse('Invalid signature', { status: 400 });
+    console.error('❌ Invalid Stripe signature:', err);
+    return new NextResponse('Webhook signature verification failed.', { status: 400 });
   }
 
-  console.log('✅ Webhook received:', event.type);
+  if (event.type !== 'checkout.session.completed') {
+    return new NextResponse('Unhandled event', { status: 200 });
+  }
 
-  // Handle different event types
   try {
-    switch (event.type) {
-      case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event);
-        break;
-      case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event);
-        break;
-      default:
-        console.log(`ℹ️  Unhandled event type: ${event.type}`);
-        break;
+    const session = event.data.object as Stripe.Checkout.Session;
+    const meta = session.metadata;
+
+    // ✅ Critical fix: Validate userId exists and is not empty
+    if (!meta?.userId || meta.userId.trim() === '') {
+      console.error('❌ Missing or empty userId in metadata:', {
+        sessionId: session.id,
+        metadata: meta,
+        customerDetails: session.customer_details
+      });
+      return new NextResponse('Missing user ID - order cannot be processed', { status: 400 });
     }
-  } catch (error) {
-    console.error(`❌ Error handling ${event.type}:`, error);
-    return new NextResponse(`Error processing ${event.type}: ${error instanceof Error ? error.message : 'Unknown error'}`, { status: 500 });
-  }
 
-  return new NextResponse('Webhook received', { status: 200 });
-}
+    if (!meta?.cartItems || !meta.totalAmount || !meta.customerEmail) {
+      console.error('❌ Missing required metadata:', {
+        hasCartItems: !!meta?.cartItems,
+        hasTotalAmount: !!meta?.totalAmount,
+        hasCustomerEmail: !!meta?.customerEmail,
+        metadata: meta
+      });
+      return new NextResponse('Missing required metadata', { status: 400 });
+    }
 
-async function handleCheckoutSessionCompleted(event: Stripe.Event) {
-  if (event.type !== 'checkout.session.completed') return;
-    const session = event.data.object as Stripe.Checkout.Session & {
-      customer_details?: {
-        email?: string;
-        name?: string;
-        phone?: string;
-      };
-      shipping_details?: {
-        address?: {
-          line1?: string;
-          line2?: string;
-          city?: string;
-          state?: string;
-          postal_code?: string;
-          country?: string;
-        };
-      };
-    };
+    const cartItems = JSON.parse(meta.cartItems);
+    const totalAmount = parseFloat(meta.totalAmount);
 
-    try {
-      console.log('🔍 Session data:', JSON.stringify(session, null, 2));
-      console.log('🔍 Session metadata:', session.metadata);
+    if (!Array.isArray(cartItems) || cartItems.length === 0 || isNaN(totalAmount)) {
+      throw new Error('Invalid cart items or total amount');
+    }
 
-      // Validate required metadata
-      if (!session.metadata?.cartItems) {
-        throw new Error('Missing cartItems in session metadata');
-      }
+    const existingOrder = await prisma.order.findFirst({
+      where: { paymentIntentId: session.payment_intent as string },
+    });
 
-      if (!session.metadata?.totalAmount) {
-        throw new Error('Missing totalAmount in session metadata');
-      }
+    if (existingOrder) {
+      console.log(`⚠️ Order already exists for ${session.payment_intent}`);
+      return new NextResponse('Already processed', { status: 200 });
+    }
 
-      const cartItems = JSON.parse(session.metadata.cartItems);
-      const totalAmount = parseFloat(session.metadata.totalAmount);
-
-      // Validate cart items
-      if (!Array.isArray(cartItems) || cartItems.length === 0) {
-        throw new Error('Invalid or empty cart items');
-      }
-
-      // Validate each cart item has required fields
-      for (const item of cartItems) {
-        if (!item.id || !item.quantity || !item.price) {
-          throw new Error(`Invalid cart item: ${JSON.stringify(item)}`);
-        }
-      }
-
-      console.log('🔍 Parsed cart items:', cartItems);
-      console.log('🔍 Total amount:', totalAmount);
-
-      // Validate customer information
-      const customerEmail = session.customer_details?.email || session.metadata?.customerEmail;
-      const customerName = session.customer_details?.name || session.metadata?.customerName;
-
-      if (!customerEmail) {
-        throw new Error('Missing customer email');
-      }
-
-      if (!customerName) {
-        throw new Error('Missing customer name');
-      }
-
-      // Check if order already exists to prevent duplicates
-      const existingOrder = await prisma.order.findFirst({
-        where: {
+    await prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          userId: meta.userId, // ✅ Already validated above - will never be null
+          email: meta.customerEmail,
+          customerName: meta.customerName,
+          phone: meta.customerPhone || null,
+          amount: totalAmount,
+          status: 'completed',
           paymentIntentId: session.payment_intent as string,
         },
       });
 
-      if (existingOrder) {
-        console.log('✅ Order already exists:', existingOrder.id);
-        return;
-      }
-
-      console.log('🔍 Creating order with data:', {
-        email: customerEmail,
-        customerName: customerName,
-        phone: session.customer_details?.phone || session.metadata?.customerPhone || '',
-        amount: totalAmount,
-        paymentIntentId: session.payment_intent as string,
+      console.log('✅ Order created with userId:', {
+        orderId: order.id,
+        userId: order.userId,
+        email: order.email
       });
 
-      // Handle userId - only include if it's a valid user ID
-      const orderData: any = {
-        email: customerEmail,
-        customerName: customerName,
-        phone: session.customer_details?.phone || session.metadata?.customerPhone || '',
-        amount: totalAmount,
-        status: 'completed', // ✅ Set to completed since payment was successful
-        paymentIntentId: session.payment_intent as string,
-        shippingAddress: session.shipping_details?.address?.line1
-          ? `${session.shipping_details.address.line1}${session.shipping_details.address.line2 ? ', ' + session.shipping_details.address.line2 : ''}`
-          : null,
-        city: session.shipping_details?.address?.city || null,
-        state: session.shipping_details?.address?.state || null,
-        postalCode: session.shipping_details?.address?.postal_code || null,
-        country: session.shipping_details?.address?.country || null,
-      };
-
-      // Only add userId if it's provided and not 'anonymous'
-      if (session.metadata?.userId && session.metadata.userId !== 'anonymous') {
-        // Verify the user exists before adding userId
-        try {
-          const userExists = await prisma.user.findUnique({
-            where: { id: session.metadata.userId },
-            select: { id: true }
-          });
-          
-          if (userExists) {
-            orderData.userId = session.metadata.userId;
-          } else {
-            console.log('⚠️ User not found, creating order without userId:', session.metadata.userId);
-          }
-        } catch (userCheckError) {
-          console.log('⚠️ Error checking user existence, creating order without userId:', userCheckError);
-        }
-      }
-
-      const order = await prisma.order.create({
-        data: orderData,
-      });
-
-      console.log('✅ Order created:', order.id);
-
-      // Create order items
       for (const item of cartItems) {
-        console.log('🔍 Creating order item:', item);
-        await prisma.orderItem.create({
+        if (!item.id || !item.quantity || !item.price) {
+          throw new Error(`Invalid cart item: ${JSON.stringify(item)}`);
+        }
+
+        const product = await tx.product.findUnique({ where: { id: item.id } });
+        if (!product || product.stock < item.quantity) {
+          throw new Error(`Stock error for product ${item.id}`);
+        }
+
+        await tx.orderItem.create({
           data: {
             orderId: order.id,
             productId: item.id,
             quantity: item.quantity,
-            price: item.price,
+            price: parseFloat(item.price.toString()),
           },
         });
-      }
 
-      console.log('✅ Order items created');
-
-      // Decrement product stock
-      for (const item of cartItems) {
-        console.log('🔍 Updating stock for product:', item.id);
-        await prisma.product.update({
+        await tx.product.update({
           where: { id: item.id },
-          data: {
-            stock: { decrement: item.quantity },
-          },
+          data: { stock: { decrement: item.quantity } },
         });
       }
-
-      console.log('✅ Order created and stock updated:', order.id);
-    } catch (err) {
-      console.error('❌ Failed to process checkout session:', err);
-      console.error('❌ Error details:', err instanceof Error ? err.message : err);
-      console.error('❌ Stack trace:', err instanceof Error ? err.stack : 'No stack trace');
-      throw new Error(`Failed to process checkout session: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    }
-}
-
-async function handlePaymentIntentSucceeded(event: Stripe.Event) {
-  if (event.type !== 'payment_intent.succeeded') return;
-  
-  const paymentIntent = event.data.object as Stripe.PaymentIntent;
-  
-  try {
-    // Update order status if it exists and is still pending
-    const updatedOrder = await prisma.order.updateMany({
-      where: {
-        paymentIntentId: paymentIntent.id,
-        status: 'pending',
-      },
-      data: {
-        status: 'completed',
-      },
     });
 
-    if (updatedOrder.count > 0) {
-      console.log('✅ Order status updated to completed for payment intent:', paymentIntent.id);
-    }
-  } catch (err) {
-    console.error('❌ Failed to update order status:', err);
-    throw new Error(`Failed to update order status: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    console.log(`✅ Order created for session ${session.id}`);
+    return new NextResponse('Success', { status: 200 });
+  } catch (error) {
+    console.error('❌ Webhook processing error:', error);
+    return new NextResponse('Webhook handler failed', { status: 500 });
   }
 }

@@ -46,7 +46,7 @@ export default function CartPage() {
               <div className="flex-1">
                 <h2 className="text-lg font-semibold">{item.name}</h2>
                 <p className="text-gray-600">
-                  ₦{(item.price / 100).toLocaleString()} x {item.quantity}
+                  £{(item.price / 100).toLocaleString()} x {item.quantity}
                 </p>
 
                 <div className="flex items-center gap-2 mt-2">
@@ -76,7 +76,7 @@ export default function CartPage() {
 
           {/* ✅ Updated grand total formatting */}
           <div className="text-right mt-4 text-xl font-bold">
-            Grand Total: ₦{(grandTotal / 100).toLocaleString()}
+            Grand Total: £{(grandTotal / 100).toLocaleString()}
           </div>
 
           <div className="text-right mt-4">

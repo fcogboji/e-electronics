@@ -36,15 +36,15 @@ export default async function AdminDashboard() {
                   {product.discount}% OFF
                 </p>
                 <p className="line-through text-gray-500">
-                  ₦{(product.price / 100).toFixed(2)}
+                  £{(product.price / 100).toFixed(2)}
                 </p>
                 <p className="text-green-600 font-bold">
-                  ₦{(product.price * (1 - product.discount / 100) / 100).toFixed(2)}
+                  £{(product.price * (1 - product.discount / 100) / 100).toFixed(2)}
                 </p>
               </>
             ) : (
               <p className="text-black font-bold">
-                ₦{(product.price / 100).toFixed(2)}
+                £{(product.price / 100).toFixed(2)}
               </p>
             )}
 

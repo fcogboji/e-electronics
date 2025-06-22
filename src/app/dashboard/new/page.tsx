@@ -65,7 +65,7 @@ export default function AddProductPage() {
       {error && <p className="text-red-500">{error}</p>}
 
       <input type="text" placeholder="Product Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="border p-2 w-full" required />
-      <input type="number" placeholder="Price (₦)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="border p-2 w-full" required />
+      <input type="number" placeholder="Price (£)" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="border p-2 w-full" required />
       <input type="text" placeholder="Image URL" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} className="border p-2 w-full" required />
       <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="border p-2 w-full" required />
       <input type="number" placeholder="Stock Quantity" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className="border p-2 w-full" min={0} required />

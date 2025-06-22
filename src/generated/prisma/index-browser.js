@@ -154,7 +154,11 @@ exports.Prisma.OrderScalarFieldEnum = {
   city: 'city',
   state: 'state',
   postalCode: 'postalCode',
-  country: 'country'
+  country: 'country',
+  shippingProvider: 'shippingProvider',
+  trackingId: 'trackingId',
+  deliveryEta: 'deliveryEta',
+  adminNote: 'adminNote'
 };
 
 exports.Prisma.OrderItemScalarFieldEnum = {

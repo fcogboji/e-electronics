@@ -69,15 +69,15 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="mt-1">
           <p className="text-red-600 font-semibold text-sm">-{validDiscount}% OFF</p>
           <p className="text-gray-500 line-through text-sm">
-            ₦{(price / 100).toLocaleString()}
+            £{(price / 100).toLocaleString()}
           </p>
           <p className="text-primary font-bold text-base">
-            ₦{(discountedPrice / 100).toLocaleString()}
+            £{(discountedPrice / 100).toLocaleString()}
           </p>
         </div>
       ) : (
         <p className="text-primary font-bold text-base mt-1">
-          ₦{(price / 100).toLocaleString()}
+          £{(price / 100).toLocaleString()}
         </p>
       )}
 

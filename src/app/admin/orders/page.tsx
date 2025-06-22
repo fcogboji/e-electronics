@@ -1,61 +1,102 @@
-// /src/app/admin/orders/page.tsx
-import { currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
+// app/(admin)/admin/orders/page.tsx
+'use client';
 
-export default async function AdminOrdersPage() {
-  const user = await currentUser();
-  if (!user || user.publicMetadata.role !== "admin") redirect("/");
+import { useEffect, useState } from 'react';
+import DashboardHeader from '@/components/orders/DashboardHeader';
+import FiltersPanel from '@/components/orders/FiltersPanel';
+import StatsCards from '@/components/orders/StatsCards';
+import OrdersTable from '@/components/orders/OrdersTable';
+import PaginationControls from '@/components/orders/PaginationControls';
+import OrderModal from '@/components/orders/OrderModal';
 
-  // Fetch completed orders
-  const orders = await prisma.order.findMany({
-    where: {
-      status: "completed"
-    },
-    include: {
-      orderItems: {
-        include: {
-          product: true
-        }
-      }
-    },
-    orderBy: { createdAt: "desc" },
-  });
+import { fetchOrdersAPI, updateOrderStatus } from '@/lib/orders';
+import { Order, PaginationData } from '@/types';
+
+const AdminOrdersDashboard = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
+  const [pagination, setPagination] = useState<PaginationData>({ total: 0, totalPages: 1, limit: 10 });
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const fetchOrders = async (params?: any) => {
+    setLoading(true);
+    try {
+      const { orders, pagination } = await fetchOrdersAPI({
+        page: currentPage,
+        status: statusFilter,
+        search: searchTerm,
+        ...dateRange,
+        ...params,
+      });
+      setOrders(orders);
+      setPagination(pagination);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [currentPage, statusFilter, searchTerm, dateRange]);
+
+  const handleStatusUpdate = async (orderId: string, status: string) => {
+    await updateOrderStatus(orderId, status);
+    fetchOrders();
+  };
+
+  const handleOrderUpdate = () => fetchOrders();
+
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setSearchTerm('');
+    setDateRange({ start: '', end: '' });
+  };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">All Customer Orders</h1>
-      {orders.length === 0 ? (
-        <p className="text-gray-500">No completed orders found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {orders.map((order) => (
-            <li key={order.id} className="border p-4 rounded">
-              <p><strong>Customer:</strong> {order.customerName}</p>
-              <p><strong>Email:</strong> {order.email}</p>
-              <p><strong>Phone:</strong> {order.phone}</p>
-              <p><strong>Amount:</strong> ₦{order.amount}</p>
-              <p><strong>Status:</strong> {order.status}</p>
-              <p><strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-              {order.shippingAddress && (
-                <p><strong>Address:</strong> {order.shippingAddress}, {order.city}, {order.state}</p>
-              )}
-              {order.orderItems.length > 0 && (
-                <div className="mt-2">
-                  <strong>Items:</strong>
-                  <ul className="ml-4 list-disc">
-                    {order.orderItems.map((item) => (
-                      <li key={item.id}>
-                        {item.product.name} (Qty: {item.quantity}) - ₦{item.price}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+    <div className="min-h-screen bg-gray-50">
+      <DashboardHeader
+        showFilters={showFilters}
+        setShowFilters={setShowFilters}
+        loading={loading}
+        onRefresh={() => fetchOrders()}
+      />
+      <div className="p-6">
+        <FiltersPanel
+          showFilters={showFilters}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          clearFilters={clearFilters}
+        />
+        <StatsCards orders={orders} pagination={pagination} />
+        <OrdersTable
+          orders={orders}
+          loading={loading}
+          setSelectedOrder={setSelectedOrder}
+          handleStatusUpdate={handleStatusUpdate}
+        />
+        <PaginationControls
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          pagination={pagination}
+        />
+      </div>
+      {selectedOrder && (
+        <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} onUpdate={handleOrderUpdate} />
       )}
     </div>
   );
-}
+};
+
+export default AdminOrdersDashboard;

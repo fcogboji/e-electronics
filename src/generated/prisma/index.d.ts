@@ -3858,6 +3858,10 @@ export namespace Prisma {
     state: string | null
     postalCode: string | null
     country: string | null
+    shippingProvider: string | null
+    trackingId: string | null
+    deliveryEta: Date | null
+    adminNote: string | null
   }
 
   export type OrderMaxAggregateOutputType = {
@@ -3875,6 +3879,10 @@ export namespace Prisma {
     state: string | null
     postalCode: string | null
     country: string | null
+    shippingProvider: string | null
+    trackingId: string | null
+    deliveryEta: Date | null
+    adminNote: string | null
   }
 
   export type OrderCountAggregateOutputType = {
@@ -3892,6 +3900,10 @@ export namespace Prisma {
     state: number
     postalCode: number
     country: number
+    shippingProvider: number
+    trackingId: number
+    deliveryEta: number
+    adminNote: number
     _all: number
   }
 
@@ -3919,6 +3931,10 @@ export namespace Prisma {
     state?: true
     postalCode?: true
     country?: true
+    shippingProvider?: true
+    trackingId?: true
+    deliveryEta?: true
+    adminNote?: true
   }
 
   export type OrderMaxAggregateInputType = {
@@ -3936,6 +3952,10 @@ export namespace Prisma {
     state?: true
     postalCode?: true
     country?: true
+    shippingProvider?: true
+    trackingId?: true
+    deliveryEta?: true
+    adminNote?: true
   }
 
   export type OrderCountAggregateInputType = {
@@ -3953,6 +3973,10 @@ export namespace Prisma {
     state?: true
     postalCode?: true
     country?: true
+    shippingProvider?: true
+    trackingId?: true
+    deliveryEta?: true
+    adminNote?: true
     _all?: true
   }
 
@@ -4057,6 +4081,10 @@ export namespace Prisma {
     state: string | null
     postalCode: string | null
     country: string | null
+    shippingProvider: string | null
+    trackingId: string | null
+    deliveryEta: Date | null
+    adminNote: string | null
     _count: OrderCountAggregateOutputType | null
     _avg: OrderAvgAggregateOutputType | null
     _sum: OrderSumAggregateOutputType | null
@@ -4093,6 +4121,10 @@ export namespace Prisma {
     state?: boolean
     postalCode?: boolean
     country?: boolean
+    shippingProvider?: boolean
+    trackingId?: boolean
+    deliveryEta?: boolean
+    adminNote?: boolean
     user?: boolean | Order$userArgs<ExtArgs>
     orderItems?: boolean | Order$orderItemsArgs<ExtArgs>
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
@@ -4113,6 +4145,10 @@ export namespace Prisma {
     state?: boolean
     postalCode?: boolean
     country?: boolean
+    shippingProvider?: boolean
+    trackingId?: boolean
+    deliveryEta?: boolean
+    adminNote?: boolean
     user?: boolean | Order$userArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
@@ -4131,6 +4167,10 @@ export namespace Prisma {
     state?: boolean
     postalCode?: boolean
     country?: boolean
+    shippingProvider?: boolean
+    trackingId?: boolean
+    deliveryEta?: boolean
+    adminNote?: boolean
     user?: boolean | Order$userArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
@@ -4149,9 +4189,13 @@ export namespace Prisma {
     state?: boolean
     postalCode?: boolean
     country?: boolean
+    shippingProvider?: boolean
+    trackingId?: boolean
+    deliveryEta?: boolean
+    adminNote?: boolean
   }
 
-  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "email" | "amount" | "status" | "paymentIntentId" | "createdAt" | "customerName" | "phone" | "shippingAddress" | "city" | "state" | "postalCode" | "country", ExtArgs["result"]["order"]>
+  export type OrderOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "email" | "amount" | "status" | "paymentIntentId" | "createdAt" | "customerName" | "phone" | "shippingAddress" | "city" | "state" | "postalCode" | "country" | "shippingProvider" | "trackingId" | "deliveryEta" | "adminNote", ExtArgs["result"]["order"]>
   export type OrderInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Order$userArgs<ExtArgs>
     orderItems?: boolean | Order$orderItemsArgs<ExtArgs>
@@ -4185,6 +4229,10 @@ export namespace Prisma {
       state: string | null
       postalCode: string | null
       country: string | null
+      shippingProvider: string | null
+      trackingId: string | null
+      deliveryEta: Date | null
+      adminNote: string | null
     }, ExtArgs["result"]["order"]>
     composites: {}
   }
@@ -4624,6 +4672,10 @@ export namespace Prisma {
     readonly state: FieldRef<"Order", 'String'>
     readonly postalCode: FieldRef<"Order", 'String'>
     readonly country: FieldRef<"Order", 'String'>
+    readonly shippingProvider: FieldRef<"Order", 'String'>
+    readonly trackingId: FieldRef<"Order", 'String'>
+    readonly deliveryEta: FieldRef<"Order", 'DateTime'>
+    readonly adminNote: FieldRef<"Order", 'String'>
   }
     
 
@@ -9410,7 +9462,11 @@ export namespace Prisma {
     city: 'city',
     state: 'state',
     postalCode: 'postalCode',
-    country: 'country'
+    country: 'country',
+    shippingProvider: 'shippingProvider',
+    trackingId: 'trackingId',
+    deliveryEta: 'deliveryEta',
+    adminNote: 'adminNote'
   };
 
   export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -9706,6 +9762,10 @@ export namespace Prisma {
     state?: StringNullableFilter<"Order"> | string | null
     postalCode?: StringNullableFilter<"Order"> | string | null
     country?: StringNullableFilter<"Order"> | string | null
+    shippingProvider?: StringNullableFilter<"Order"> | string | null
+    trackingId?: StringNullableFilter<"Order"> | string | null
+    deliveryEta?: DateTimeNullableFilter<"Order"> | Date | string | null
+    adminNote?: StringNullableFilter<"Order"> | string | null
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     orderItems?: OrderItemListRelationFilter
   }
@@ -9725,6 +9785,10 @@ export namespace Prisma {
     state?: SortOrderInput | SortOrder
     postalCode?: SortOrderInput | SortOrder
     country?: SortOrderInput | SortOrder
+    shippingProvider?: SortOrderInput | SortOrder
+    trackingId?: SortOrderInput | SortOrder
+    deliveryEta?: SortOrderInput | SortOrder
+    adminNote?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
     orderItems?: OrderItemOrderByRelationAggregateInput
   }
@@ -9747,6 +9811,10 @@ export namespace Prisma {
     state?: StringNullableFilter<"Order"> | string | null
     postalCode?: StringNullableFilter<"Order"> | string | null
     country?: StringNullableFilter<"Order"> | string | null
+    shippingProvider?: StringNullableFilter<"Order"> | string | null
+    trackingId?: StringNullableFilter<"Order"> | string | null
+    deliveryEta?: DateTimeNullableFilter<"Order"> | Date | string | null
+    adminNote?: StringNullableFilter<"Order"> | string | null
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     orderItems?: OrderItemListRelationFilter
   }, "id">
@@ -9766,6 +9834,10 @@ export namespace Prisma {
     state?: SortOrderInput | SortOrder
     postalCode?: SortOrderInput | SortOrder
     country?: SortOrderInput | SortOrder
+    shippingProvider?: SortOrderInput | SortOrder
+    trackingId?: SortOrderInput | SortOrder
+    deliveryEta?: SortOrderInput | SortOrder
+    adminNote?: SortOrderInput | SortOrder
     _count?: OrderCountOrderByAggregateInput
     _avg?: OrderAvgOrderByAggregateInput
     _max?: OrderMaxOrderByAggregateInput
@@ -9791,6 +9863,10 @@ export namespace Prisma {
     state?: StringNullableWithAggregatesFilter<"Order"> | string | null
     postalCode?: StringNullableWithAggregatesFilter<"Order"> | string | null
     country?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    shippingProvider?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    trackingId?: StringNullableWithAggregatesFilter<"Order"> | string | null
+    deliveryEta?: DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
+    adminNote?: StringNullableWithAggregatesFilter<"Order"> | string | null
   }
 
   export type OrderItemWhereInput = {
@@ -10198,6 +10274,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
     user?: UserCreateNestedOneWithoutOrdersInput
     orderItems?: OrderItemCreateNestedManyWithoutOrderInput
   }
@@ -10217,6 +10297,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
   }
 
@@ -10234,6 +10318,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutOrdersNestedInput
     orderItems?: OrderItemUpdateManyWithoutOrderNestedInput
   }
@@ -10253,6 +10341,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     orderItems?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   }
 
@@ -10271,6 +10363,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
   }
 
   export type OrderUpdateManyMutationInput = {
@@ -10287,6 +10383,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type OrderUncheckedUpdateManyInput = {
@@ -10304,6 +10404,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type OrderItemCreateInput = {
@@ -10826,6 +10930,17 @@ export namespace Prisma {
     not?: NestedFloatFilter<$PrismaModel> | number
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type UserNullableScalarRelationFilter = {
     is?: UserWhereInput | null
     isNot?: UserWhereInput | null
@@ -10846,6 +10961,10 @@ export namespace Prisma {
     state?: SortOrder
     postalCode?: SortOrder
     country?: SortOrder
+    shippingProvider?: SortOrder
+    trackingId?: SortOrder
+    deliveryEta?: SortOrder
+    adminNote?: SortOrder
   }
 
   export type OrderAvgOrderByAggregateInput = {
@@ -10867,6 +10986,10 @@ export namespace Prisma {
     state?: SortOrder
     postalCode?: SortOrder
     country?: SortOrder
+    shippingProvider?: SortOrder
+    trackingId?: SortOrder
+    deliveryEta?: SortOrder
+    adminNote?: SortOrder
   }
 
   export type OrderMinOrderByAggregateInput = {
@@ -10884,6 +11007,10 @@ export namespace Prisma {
     state?: SortOrder
     postalCode?: SortOrder
     country?: SortOrder
+    shippingProvider?: SortOrder
+    trackingId?: SortOrder
+    deliveryEta?: SortOrder
+    adminNote?: SortOrder
   }
 
   export type OrderSumOrderByAggregateInput = {
@@ -10922,6 +11049,20 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type OrderScalarRelationFilter = {
@@ -11291,6 +11432,10 @@ export namespace Prisma {
     set?: string | null
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type UserUpdateOneWithoutOrdersNestedInput = {
     create?: XOR<UserCreateWithoutOrdersInput, UserUncheckedCreateWithoutOrdersInput>
     connectOrCreate?: UserCreateOrConnectWithoutOrdersInput
@@ -11547,6 +11692,17 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -11580,6 +11736,20 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type OrderCreateWithoutUserInput = {
     id?: string
     email: string
@@ -11594,6 +11764,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
     orderItems?: OrderItemCreateNestedManyWithoutOrderInput
   }
 
@@ -11611,6 +11785,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
   }
 
@@ -11658,6 +11836,10 @@ export namespace Prisma {
     state?: StringNullableFilter<"Order"> | string | null
     postalCode?: StringNullableFilter<"Order"> | string | null
     country?: StringNullableFilter<"Order"> | string | null
+    shippingProvider?: StringNullableFilter<"Order"> | string | null
+    trackingId?: StringNullableFilter<"Order"> | string | null
+    deliveryEta?: DateTimeNullableFilter<"Order"> | Date | string | null
+    adminNote?: StringNullableFilter<"Order"> | string | null
   }
 
   export type WishlistCreateWithoutProductInput = {
@@ -11906,6 +12088,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
     user?: UserCreateNestedOneWithoutOrdersInput
   }
 
@@ -11924,6 +12110,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
   }
 
   export type OrderCreateOrConnectWithoutOrderItemsInput = {
@@ -11995,6 +12185,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneWithoutOrdersNestedInput
   }
 
@@ -12013,6 +12207,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProductUpsertWithoutOrderItemsInput = {
@@ -12242,6 +12440,10 @@ export namespace Prisma {
     state?: string | null
     postalCode?: string | null
     country?: string | null
+    shippingProvider?: string | null
+    trackingId?: string | null
+    deliveryEta?: Date | string | null
+    adminNote?: string | null
   }
 
   export type OrderUpdateWithoutUserInput = {
@@ -12258,6 +12460,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     orderItems?: OrderItemUpdateManyWithoutOrderNestedInput
   }
 
@@ -12275,6 +12481,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
     orderItems?: OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   }
 
@@ -12292,6 +12502,10 @@ export namespace Prisma {
     state?: NullableStringFieldUpdateOperationsInput | string | null
     postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     country?: NullableStringFieldUpdateOperationsInput | string | null
+    shippingProvider?: NullableStringFieldUpdateOperationsInput | string | null
+    trackingId?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryEta?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adminNote?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type WishlistCreateManyProductInput = {
