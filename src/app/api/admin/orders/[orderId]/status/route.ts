@@ -2,12 +2,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { orderId: string } }
-) {
+type Context = {
+  params: {
+    orderId: string;
+  };
+};
+
+export async function PATCH(req: NextRequest, context: Context) {
   try {
-    const { orderId } = params;
+    const { orderId } = context.params;
     const { status } = await req.json();
 
     if (!status) {
