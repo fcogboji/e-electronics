@@ -1,15 +1,15 @@
 // app/search/page.tsx
-/*"use client";
+"use client";
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-// ...other imports
 import { useEffect, useState } from "react";
 import { useCartStore } from "@/stores/cartStore";
 import { Search, Filter, Grid, List, Star, ShoppingCart } from "lucide-react";
 
 export default function SearchPage() {
-  const q = useSearchParams().get("q") ?? "";
+  const searchParams = useSearchParams();
+  const q = searchParams.get("q") ?? "";
   const [products, setProducts] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,11 +19,18 @@ export default function SearchPage() {
   useEffect(() => {
     async function fetchList() {
       setLoading(true);
-      const res = await fetch(`/api/products?query=${encodeURIComponent(q)}`);
-      const data = await res.json();
-      setProducts(data);
-      setFiltered(data);
-      setLoading(false);
+      try {
+        const res = await fetch(`/api/products?query=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        setProducts(data);
+        setFiltered(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+        setFiltered([]);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchList();
   }, [q]);
@@ -52,4 +59,4 @@ export default function SearchPage() {
       </div>
     </div>
   );
-}*/
+}
