@@ -3,11 +3,11 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useCartStore } from "@/stores/cartStore";
 import { Search, Filter, Grid, List, Star, ShoppingCart } from "lucide-react";
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const q = searchParams.get("q") ?? "";
   const [products, setProducts] = useState<any[]>([]);
@@ -58,5 +58,13 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading search...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
