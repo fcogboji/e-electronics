@@ -1,15 +1,14 @@
 // app/api/orders/[orderId]/route.ts
-
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { orderId: string } }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const orderId = params.orderId;
-    
+    const { orderId } = await params;
+        
     // 🔍 DEBUG: Log what we received
     console.log('🔍 API received orderId:', orderId);
     console.log('🔍 Full URL:', req.url);
@@ -44,7 +43,7 @@ export async function GET(
 
     if (!order) {
       console.log('❌ Order not found in database');
-      
+            
       // 🔍 DEBUG: Check if any orders exist with similar ID
       const similarOrders = await prisma.order.findMany({
         where: {
@@ -57,7 +56,7 @@ export async function GET(
         take: 5
       });
       console.log('🔍 Similar orders found:', similarOrders);
-      
+            
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
