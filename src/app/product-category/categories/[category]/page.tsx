@@ -3,11 +3,11 @@ import ProductCard from "@/components/ProductCard";
 import { Metadata } from "next";
 
 interface CategoryPageProps {
-  params: { category: string };
+  params: Promise<{ category: string }>;
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const { category } = params;
+  const { category } = await params;
   const decodedCategory = decodeURIComponent(category);
 
   return {
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { category } = params;
+  const { category } = await params;
   const decodedCategory = decodeURIComponent(category);
 
   // Optional: convert slug to category name if needed
