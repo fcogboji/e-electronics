@@ -1,10 +1,7 @@
 // next.config.ts
-import { NextConfig } from 'next';
+import type { NextConfig } from 'next';
 
-// next.config.js
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -14,11 +11,24 @@ const nextConfig = {
       'files.stripe.com',
       'res.cloudinary.com',
       'images.macrumors.com',
-      'm.media-amazon.com', // ✅ Add this line
-      "i5.walmartimages.com",
-      "images.samsung.com" 
+      'm.media-amazon.com',
+      'i5.walmartimages.com',
+      'images.samsung.com',
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+    ];
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

@@ -1,12 +1,8 @@
 // File: /app/api/create-checkout-session/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
+import { getStripe } from '@/lib/stripe';
 
 interface CartItem {
   id: string;
@@ -30,7 +26,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'You must be signed in to checkout.' }, { status: 401 });
     }
 
-    // ✅ Validate user ID exists and is not empty
     if (!user.id || user.id.trim() === '') {
       console.error('❌ Invalid user ID:', user.id);
       return NextResponse.json({ error: 'Invalid user session' }, { status: 401 });
@@ -45,7 +40,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
 
-    // Validate stock
     for (const item of cartItems) {
       const dbProduct = await prisma.product.findUnique({ where: { id: item.id } });
       if (!dbProduct || dbProduct.stock < item.quantity) {
@@ -60,11 +54,10 @@ export async function POST(req: NextRequest) {
       
       return {
         price_data: {
-        currency: 'GBP',
-        product_data: { name: item.name },
-        unit_amount: price, // ✅ ALREADY in pence
-},
-
+          currency: 'GBP',
+          product_data: { name: item.name },
+          unit_amount: price,
+        },
         quantity: item.quantity,
       };
     });
@@ -76,23 +69,17 @@ export async function POST(req: NextRequest) {
       return sum + price * item.quantity;
     }, 0);
 
-    // ✅ Ensure all required fields are properly set
     const metadata = {
       cartItems: JSON.stringify(cartItems),
       totalAmount: totalAmount.toFixed(2),
       customerEmail: customerInfo?.email ?? user.emailAddresses?.[0]?.emailAddress ?? '',
       customerName: customerInfo?.name ?? `${user.firstName || ''} ${user.lastName || ''}`.trim(),
       customerPhone: customerInfo?.phone ?? '',
-      userId: user.id, // ✅ Already validated above
-      clerkUserId: user.id, // ✅ Add explicit clerk user ID for webhook
+      userId: user.id,
+      clerkUserId: user.id,
     };
 
-    // ✅ Log metadata for debugging
-    console.log('✅ Creating checkout session with metadata:', {
-      userId: metadata.userId,
-      customerEmail: metadata.customerEmail,
-      totalAmount: metadata.totalAmount
-    });
+    const stripe = getStripe();
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -102,7 +89,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${req.nextUrl.origin}/cart`,
       customer_email: customerInfo?.email || user.emailAddresses?.[0]?.emailAddress,
       shipping_address_collection: {
-        allowed_countries: ['NG', 'US', 'GB', 'CA']
+        allowed_countries: ['NG', 'US', 'GB', 'CA'],
       },
       metadata,
     });

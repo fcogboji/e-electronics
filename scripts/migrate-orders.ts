@@ -1,5 +1,5 @@
 // scripts/migrate-orders.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../src/generated/prisma';
 
 // Create Prisma client instance
 const prisma = new PrismaClient();
@@ -57,8 +57,13 @@ async function migrateOrders() {
       console.log(`  ${email}: ${(orders as OrderSelect[]).length} orders`);
     }
 
-    const CURRENT_USER_ID = 'user_2x0gPgC8cciYAs98eX15bwdTWne'; // Updated to match API query
-    const CURRENT_USER_EMAIL = 'friday.ogboji100@gmail.com';
+    const CURRENT_USER_ID = process.env.MIGRATE_USER_ID ?? '';
+    const CURRENT_USER_EMAIL = process.env.MIGRATE_EMAIL ?? '';
+
+    if (!CURRENT_USER_ID || !CURRENT_USER_EMAIL) {
+      console.error('❌ Please set MIGRATE_USER_ID and MIGRATE_EMAIL environment variables');
+      process.exit(1);
+    }
 
     console.log(`\n🎯 Migrating orders for ${CURRENT_USER_EMAIL} to userId: ${CURRENT_USER_ID}`);
 
