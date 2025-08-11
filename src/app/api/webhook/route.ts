@@ -1,7 +1,7 @@
 // File: /app/api/webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
+import { getStripe } from '@/lib/stripe';
 
 export const config = {
   api: {
@@ -9,17 +9,15 @@ export const config = {
   },
 };
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: NextRequest) {
-  let event: Stripe.Event;
+  let event: any;
   const rawBody = await req.text();
   const sig = req.headers.get('stripe-signature')!;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     console.log(`✅ Verified webhook: ${event.id} (${event.type})`);
   } catch (err) {
@@ -32,15 +30,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const meta = session.metadata;
+    const stripe = getStripe();
+    const session = event.data.object as Awaited<ReturnType<typeof stripe.checkout.sessions.retrieve>>;
+    const meta = session.metadata as any;
 
-    // ✅ Critical fix: Validate userId exists and is not empty
     if (!meta?.userId || meta.userId.trim() === '') {
       console.error('❌ Missing or empty userId in metadata:', {
         sessionId: session.id,
         metadata: meta,
-        customerDetails: session.customer_details
+        customerDetails: (session as any).customer_details,
       });
       return new NextResponse('Missing user ID - order cannot be processed', { status: 400 });
     }
@@ -50,7 +48,7 @@ export async function POST(req: NextRequest) {
         hasCartItems: !!meta?.cartItems,
         hasTotalAmount: !!meta?.totalAmount,
         hasCustomerEmail: !!meta?.customerEmail,
-        metadata: meta
+        metadata: meta,
       });
       return new NextResponse('Missing required metadata', { status: 400 });
     }
@@ -63,31 +61,25 @@ export async function POST(req: NextRequest) {
     }
 
     const existingOrder = await prisma.order.findFirst({
-      where: { paymentIntentId: session.payment_intent as string },
+      where: { paymentIntentId: (session as any).payment_intent as string },
     });
 
     if (existingOrder) {
-      console.log(`⚠️ Order already exists for ${session.payment_intent}`);
+      console.log(`⚠️ Order already exists for ${(session as any).payment_intent}`);
       return new NextResponse('Already processed', { status: 200 });
     }
 
     await prisma.$transaction(async (tx) => {
       const order = await tx.order.create({
         data: {
-          userId: meta.userId, // ✅ Already validated above - will never be null
+          userId: meta.userId,
           email: meta.customerEmail,
           customerName: meta.customerName,
           phone: meta.customerPhone || null,
           amount: totalAmount,
           status: 'completed',
-          paymentIntentId: session.payment_intent as string,
+          paymentIntentId: (session as any).payment_intent as string,
         },
-      });
-
-      console.log('✅ Order created with userId:', {
-        orderId: order.id,
-        userId: order.userId,
-        email: order.email
       });
 
       for (const item of cartItems) {

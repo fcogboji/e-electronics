@@ -1,9 +1,8 @@
-import { ClerkProvider } from '@clerk/nextjs';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CarouselWrapper from '@/components/CarouselWrapper';
-import ToasterProvider from '@/components/ToasterProvider'; // ✅ Import this
 import ElectroShopBanner from '@/components/ElectroShopBanner';
+import ClientProviders from '@/components/ClientProviders';
 import './globals.css';
 
 export const metadata = {
@@ -11,18 +10,23 @@ export const metadata = {
   description: 'Buy electronics and phone accessories online',
 };
 
+function ClientShell({ children }: { children: React.ReactNode }) {
+  return (
+    <ClientProviders>
+      <ElectroShopBanner />
+      <Navbar />
+      <CarouselWrapper />
+      <main className="flex-grow pt-20">{children}</main>
+      <Footer />
+    </ClientProviders>
+  );
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
-        <ClerkProvider>
-          <ToasterProvider /> {/* ✅ Only this is client-side */}
-          <ElectroShopBanner />
-          <Navbar />
-          <CarouselWrapper />
-          <main className="flex-grow pt-20">{children}</main>
-          <Footer />
-        </ClerkProvider>
+        <ClientShell>{children}</ClientShell>
       </body>
     </html>
   );
