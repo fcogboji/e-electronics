@@ -11,10 +11,13 @@ interface OrdersTableProps {
 
 const statusOptions = [
   'pending',
+  'confirmed',
   'processing',
   'shipped',
   'delivered',
+  'completed',
   'cancelled',
+  'cancellation_requested',
   'returned',
 ];
 
@@ -48,7 +51,7 @@ const OrdersTable = ({
           <div className="truncate text-xs text-gray-700">{order.id}</div>
           <div className="truncate">{order.customerName || order.email || 'N/A'}</div>
           <div className="truncate font-medium text-gray-800">
-            £{Number(order.amount).toLocaleString()}
+            £{Number(order.amount).toFixed(2)}
           </div>
           <div>
             <select

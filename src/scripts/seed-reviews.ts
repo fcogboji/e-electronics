@@ -7,39 +7,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Sample review data for testing
-const sampleReviews = [
-  {
-    rating: 5,
-    comment: "Excellent product! Exactly what I was looking for. Fast shipping and great quality.",
-    userId: "user_sample_1", // Replace with actual Clerk user IDs
-    productId: "product_1",  // Replace with actual product IDs
-  },
-  {
-    rating: 4,
-    comment: "Very good product, minor issues with packaging but overall satisfied.",
-    userId: "user_sample_2",
-    productId: "product_1",
-  },
-  {
-    rating: 5,
-    comment: "Outstanding quality and customer service. Highly recommend!",
-    userId: "user_sample_3",
-    productId: "product_1",
-  },
-  {
-    rating: 3,
-    comment: "Product is okay, but not quite what I expected. Could be better.",
-    userId: "user_sample_4",
-    productId: "product_1",
-  },
-  {
-    rating: 4,
-    comment: "Good value for money. Would buy again.",
-    userId: "user_sample_5",
-    productId: "product_1",
-  },
-];
+// No sample reviews - ready for real data
+const sampleReviews: any[] = [];
 
 // Function to seed sample reviews
 async function seedReviews() {

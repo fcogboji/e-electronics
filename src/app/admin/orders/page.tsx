@@ -52,8 +52,6 @@ const AdminOrdersDashboard = () => {
     fetchOrders();
   };
 
-  const handleOrderUpdate = () => fetchOrders();
-
   const clearFilters = () => {
     setStatusFilter('all');
     setSearchTerm('');
@@ -93,7 +91,7 @@ const AdminOrdersDashboard = () => {
         />
       </div>
       {selectedOrder && (
-        <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} onUpdate={handleOrderUpdate} />
+        <OrderModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
       )}
     </div>
   );

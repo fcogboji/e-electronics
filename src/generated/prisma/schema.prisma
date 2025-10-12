@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "darwin-arm64", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL") // For migrations
 }
 
 model User {
@@ -27,20 +29,72 @@ model Product {
   createdAt    DateTime @default(now())
   avgRating    Float?
   totalReviews Int      @default(0)
+  isLivePromo  Boolean  @default(false)
+  isFeatured   Boolean  @default(false)
+  isLaptop     Boolean  @default(false)
 
-  wishlists  Wishlist[]
-  reviews    Review[]
-  orderItems OrderItem[]
+  wishlists   Wishlist[]
+  reviews     Review[]
+  orderItems  OrderItem[]
+  returnItems ReturnItem[]
+  variants    ProductVariant[]
+  images      ProductImage[]
+
+  // Performance indexes for common queries
+  @@index([category])
+  @@index([brand])
+  @@index([isFeatured])
+  @@index([isLivePromo])
+  @@index([createdAt])
+  @@index([avgRating])
+  @@index([category, isFeatured])
+  @@index([category, createdAt])
+}
+
+model ProductVariant {
+  id              String   @id @default(cuid())
+  productId       String
+  condition       String? // Fair, Good, Excellent, Premium
+  storage         String? // 128 GB, 256 GB, 512 GB, etc
+  simType         String? // eSIM, Physical SIM + eSIM, etc
+  color           String? // Black, Grey, Silver, etc
+  processor       String? // For laptops: Apple M1 Pro, Apple M1 Max, Intel i7, etc
+  memory          String? // For laptops: 16 GB, 32 GB, 64 GB, etc
+  stock           Int      @default(0)
+  priceAdjustment Int      @default(0) // Price adjustment from base price
+  isAvailable     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, condition, storage, simType, color, processor, memory])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  imageUrl  String
+  color     String? // Associated color for this image
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Order {
-  id              String   @id @default(cuid())
-  userId          String? // ✅ optional
-  email           String
-  amount          Float
-  status          String   @default("pending")
-  paymentIntentId String?
-  createdAt       DateTime @default(now())
+  id               String    @id @default(cuid())
+  userId           String? // ✅ optional
+  email            String
+  amount           Float
+  status           String    @default("pending")
+  paymentIntentId  String?
+  paymentReference String?   @unique // Paystack payment reference
+  paymentChannel   String? // Payment channel (card, bank, etc)
+  customerEmail    String? // Customer email from payment
+  paidAt           DateTime? // When payment was confirmed
+  createdAt        DateTime  @default(now())
 
   customerName     String?
   phone            String?
@@ -56,26 +110,157 @@ model Order {
 
   user       User?       @relation("UserOrders", fields: [userId], references: [id]) // ✅ optional
   orderItems OrderItem[]
+
+  // Performance indexes for common queries
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId, status])
+  @@index([status, createdAt])
 }
 
 model OrderItem {
-  id        String @id @default(cuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Float
+  id             String  @id @default(cuid())
+  orderId        String
+  productId      String
+  productName    String? // Store product name at time of purchase
+  productImage   String? // Store product image at time of purchase
+  quantity       Int
+  price          Float
+  specifications String? // JSON string of all specifications
+
+  // Product specifications selected by user
+  condition String? // e.g. "New", "Used", "Refurbished"
+  storage   String? // e.g. "128GB", "256GB", "512GB"
+  simType   String? // e.g. "Single SIM", "Dual SIM", "eSIM"
+  color     String? // e.g. "Black", "White", "Blue"
 
   order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])
 }
 
 model ReturnRequest {
+  id           String       @id @default(cuid())
+  orderId      String
+  reason       String
+  details      String?
+  userId       String
+  status       ReturnStatus @default(PENDING)
+  refundAmount Float?
+  approvedBy   String?
+  processedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  returnItems ReturnItem[]
+}
+
+model ReturnItem {
+  id              String  @id @default(cuid())
+  returnRequestId String
+  productId       String
+  quantity        Int
+  reason          String
+  condition       String?
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id])
+  product       Product       @relation(fields: [productId], references: [id])
+}
+
+model OrderCancellation {
+  id           String             @id @default(cuid())
+  orderId      String             @unique
+  userId       String
+  reason       String
+  details      String?
+  status       CancellationStatus @default(PENDING)
+  refundAmount Float?
+  approvedBy   String?
+  processedAt  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model ChatConversation {
+  id         String       @id @default(cuid())
+  userId     String
+  orderId    String?
+  subject    String       @default("General Inquiry")
+  status     ChatStatus   @default(OPEN)
+  priority   ChatPriority @default(NORMAL)
+  assignedTo String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  messages ChatMessage[]
+}
+
+model ChatMessage {
+  id             String        @id @default(cuid())
+  conversationId String
+  senderId       String
+  senderType     MessageSender
+  content        String
+  attachments    String?
+  isRead         Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+
+  conversation ChatConversation @relation(fields: [conversationId], references: [id])
+}
+
+model OrderStatusHistory {
   id        String   @id @default(cuid())
   orderId   String
-  reason    String
-  details   String?
-  userId    String
+  oldStatus String?
+  newStatus String
+  changedBy String?
+  notes     String?
   createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   @default("admin")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+enum ReturnStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+}
+
+enum CancellationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REFUNDED
+}
+
+enum ChatStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum ChatPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum MessageSender {
+  USER
+  ADMIN
+  SYSTEM
 }
 
 model Wishlist {
@@ -84,6 +269,12 @@ model Wishlist {
   product   Product  @relation(fields: [productId], references: [id])
   productId String
   createdAt DateTime @default(now())
+
+  // Performance indexes and constraints
+  @@unique([userId, productId]) // Prevent duplicate wishlist entries
+  @@index([userId])
+  @@index([productId])
+  @@index([createdAt])
 }
 
 model Review {
@@ -99,4 +290,63 @@ model Review {
 
   @@unique([userId, productId])
   @@map("reviews")
+}
+
+model ProductCategory {
+  id        String   @id @default(cuid())
+  title     String
+  icon      String
+  image     String
+  price     String?
+  productId String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SponsoredProduct {
+  id        String   @id @default(cuid())
+  title     String
+  price     String
+  discount  String?
+  image     String
+  productId String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FlashSale {
+  id         String   @id @default(cuid())
+  productId  String
+  name       String
+  price      String
+  oldPrice   String?
+  discount   String?
+  image      String
+  itemsLeft  Int
+  totalItems Int
+  progress   Int
+  active     Boolean  @default(true)
+  endsAt     DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  discountType  String // "percentage" or "fixed"
+  discountValue Int // Percentage (1-100) or fixed amount in kobo
+  minPurchase   Int? // Minimum purchase amount in kobo
+  maxDiscount   Int? // Maximum discount amount in kobo (for percentage)
+  usageLimit    Int? // Total number of times can be used
+  usageCount    Int       @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("coupons")
 }

@@ -1,6 +1,8 @@
 // --- MY ACCOUNT ---
 // File: /src/app/account/page.tsx
 "use client";
+
+export const dynamic = 'force-dynamic';
 import { useUser } from "@clerk/nextjs";
 
 export default function MyAccountPage() {

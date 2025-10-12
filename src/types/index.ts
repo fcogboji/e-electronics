@@ -14,6 +14,7 @@ export type Product = {
   createdAt: Date;
   avgRating: number | null;
   totalReviews: number;
+  isLaptop: boolean;
 };
 
 // Represents a single item in an order

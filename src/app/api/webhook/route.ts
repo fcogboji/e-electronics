@@ -1,7 +1,8 @@
 // File: /app/api/webhook/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
+import { env } from '@/lib/env';
+import crypto from 'crypto';
 
 export const config = {
   api: {
@@ -9,53 +10,55 @@ export const config = {
   },
 };
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = env.PAYSTACK_WEBHOOK_SECRET;
 
 export async function POST(req: NextRequest) {
-  let event: Stripe.Event;
+  console.log('🔔 Paystack webhook received');
   const rawBody = await req.text();
-  const sig = req.headers.get('stripe-signature')!;
+  const hash = crypto
+    .createHmac('sha512', webhookSecret)
+    .update(rawBody)
+    .digest('hex');
 
-  try {
-    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    console.log(`✅ Verified webhook: ${event.id} (${event.type})`);
-  } catch (err) {
-    console.error('❌ Invalid Stripe signature:', err);
+  const signature = req.headers.get('x-paystack-signature');
+
+  if (hash !== signature) {
+    console.error('❌ Webhook signature verification failed');
     return new NextResponse('Webhook signature verification failed.', { status: 400 });
   }
 
-  if (event.type !== 'checkout.session.completed') {
+  console.log('✅ Webhook signature verified');
+
+  let event;
+  try {
+    event = JSON.parse(rawBody);
+  } catch (err) {
+    console.error('❌ Failed to parse webhook body:', err);
+    return new NextResponse('Invalid JSON', { status: 400 });
+  }
+
+  if (event.event !== 'charge.success') {
+    console.log('⚠️ Unhandled event type:', event.event);
     return new NextResponse('Unhandled event', { status: 200 });
   }
 
   try {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const meta = session.metadata;
+    console.log('🛒 Processing charge.success event');
+    const data = event.data;
+    const meta = data.metadata;
+    console.log('📦 Session metadata:', meta);
 
-    // ✅ Critical fix: Validate userId exists and is not empty
+    // Validate userId exists and is not empty
     if (!meta?.userId || meta.userId.trim() === '') {
-      console.error('❌ Missing or empty userId in metadata:', {
-        sessionId: session.id,
-        metadata: meta,
-        customerDetails: session.customer_details
-      });
       return new NextResponse('Missing user ID - order cannot be processed', { status: 400 });
     }
 
     if (!meta?.cartItems || !meta.totalAmount || !meta.customerEmail) {
-      console.error('❌ Missing required metadata:', {
-        hasCartItems: !!meta?.cartItems,
-        hasTotalAmount: !!meta?.totalAmount,
-        hasCustomerEmail: !!meta?.customerEmail,
-        metadata: meta
-      });
       return new NextResponse('Missing required metadata', { status: 400 });
     }
 
     const cartItems = JSON.parse(meta.cartItems);
+    const specifications = meta.specifications ? JSON.parse(meta.specifications) : {};
     const totalAmount = parseFloat(meta.totalAmount);
 
     if (!Array.isArray(cartItems) || cartItems.length === 0 || isNaN(totalAmount)) {
@@ -63,15 +66,21 @@ export async function POST(req: NextRequest) {
     }
 
     const existingOrder = await prisma.order.findFirst({
-      where: { paymentIntentId: session.payment_intent as string },
+      where: { paymentIntentId: data.reference },
     });
 
     if (existingOrder) {
-      console.log(`⚠️ Order already exists for ${session.payment_intent}`);
       return new NextResponse('Already processed', { status: 200 });
     }
 
     await prisma.$transaction(async (tx) => {
+      console.log('💾 Creating order with data:', {
+        userId: meta.userId,
+        email: meta.customerEmail,
+        customerName: meta.customerName,
+        amount: totalAmount
+      });
+
       const order = await tx.order.create({
         data: {
           userId: meta.userId, // ✅ Already validated above - will never be null
@@ -80,15 +89,12 @@ export async function POST(req: NextRequest) {
           phone: meta.customerPhone || null,
           amount: totalAmount,
           status: 'completed',
-          paymentIntentId: session.payment_intent as string,
+          paymentIntentId: data.reference,
         },
       });
 
-      console.log('✅ Order created with userId:', {
-        orderId: order.id,
-        userId: order.userId,
-        email: order.email
-      });
+      console.log('✅ Order created with ID:', order.id);
+
 
       for (const item of cartItems) {
         if (!item.id || !item.quantity || !item.price) {
@@ -100,12 +106,18 @@ export async function POST(req: NextRequest) {
           throw new Error(`Stock error for product ${item.id}`);
         }
 
+        const itemSpecs = specifications[item.id] || {};
+
         await tx.orderItem.create({
           data: {
             orderId: order.id,
             productId: item.id,
             quantity: item.quantity,
             price: parseFloat(item.price.toString()),
+            condition: itemSpecs.condition || null,
+            storage: itemSpecs.storage || null,
+            simType: itemSpecs.simType || null,
+            color: itemSpecs.color || null,
           },
         });
 
@@ -116,10 +128,10 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    console.log(`✅ Order created for session ${session.id}`);
+    console.log('🎉 Order processing completed successfully');
     return new NextResponse('Success', { status: 200 });
   } catch (error) {
-    console.error('❌ Webhook processing error:', error);
+    console.error('❌ Webhook handler failed:', error);
     return new NextResponse('Webhook handler failed', { status: 500 });
   }
 }

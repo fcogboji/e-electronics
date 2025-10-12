@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.9.0
- * Query Engine version: 81e4af48011447c3cc503a190e86995b66d2a28e
+ * Prisma Client JS version: 6.16.3
+ * Query Engine version: bb420e667c1820a8c05a38023385f6cc7ef8e83a
  */
 Prisma.prismaVersion = {
-  client: "6.9.0",
-  engine: "81e4af48011447c3cc503a190e86995b66d2a28e"
+  client: "6.16.3",
+  engine: "bb420e667c1820a8c05a38023385f6cc7ef8e83a"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -137,7 +137,36 @@ exports.Prisma.ProductScalarFieldEnum = {
   stock: 'stock',
   createdAt: 'createdAt',
   avgRating: 'avgRating',
-  totalReviews: 'totalReviews'
+  totalReviews: 'totalReviews',
+  isLivePromo: 'isLivePromo',
+  isFeatured: 'isFeatured',
+  isLaptop: 'isLaptop'
+};
+
+exports.Prisma.ProductVariantScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  condition: 'condition',
+  storage: 'storage',
+  simType: 'simType',
+  color: 'color',
+  processor: 'processor',
+  memory: 'memory',
+  stock: 'stock',
+  priceAdjustment: 'priceAdjustment',
+  isAvailable: 'isAvailable',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProductImageScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  imageUrl: 'imageUrl',
+  color: 'color',
+  isPrimary: 'isPrimary',
+  order: 'order',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.OrderScalarFieldEnum = {
@@ -147,6 +176,10 @@ exports.Prisma.OrderScalarFieldEnum = {
   amount: 'amount',
   status: 'status',
   paymentIntentId: 'paymentIntentId',
+  paymentReference: 'paymentReference',
+  paymentChannel: 'paymentChannel',
+  customerEmail: 'customerEmail',
+  paidAt: 'paidAt',
   createdAt: 'createdAt',
   customerName: 'customerName',
   phone: 'phone',
@@ -165,8 +198,15 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
   productId: 'productId',
+  productName: 'productName',
+  productImage: 'productImage',
   quantity: 'quantity',
-  price: 'price'
+  price: 'price',
+  specifications: 'specifications',
+  condition: 'condition',
+  storage: 'storage',
+  simType: 'simType',
+  color: 'color'
 };
 
 exports.Prisma.ReturnRequestScalarFieldEnum = {
@@ -175,6 +215,76 @@ exports.Prisma.ReturnRequestScalarFieldEnum = {
   reason: 'reason',
   details: 'details',
   userId: 'userId',
+  status: 'status',
+  refundAmount: 'refundAmount',
+  approvedBy: 'approvedBy',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ReturnItemScalarFieldEnum = {
+  id: 'id',
+  returnRequestId: 'returnRequestId',
+  productId: 'productId',
+  quantity: 'quantity',
+  reason: 'reason',
+  condition: 'condition'
+};
+
+exports.Prisma.OrderCancellationScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  userId: 'userId',
+  reason: 'reason',
+  details: 'details',
+  status: 'status',
+  refundAmount: 'refundAmount',
+  approvedBy: 'approvedBy',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChatConversationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orderId: 'orderId',
+  subject: 'subject',
+  status: 'status',
+  priority: 'priority',
+  assignedTo: 'assignedTo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChatMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  senderType: 'senderType',
+  content: 'content',
+  attachments: 'attachments',
+  isRead: 'isRead',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.OrderStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  oldStatus: 'oldStatus',
+  newStatus: 'newStatus',
+  changedBy: 'changedBy',
+  notes: 'notes',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.AdminUserScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  role: 'role',
+  isActive: 'isActive',
   createdAt: 'createdAt'
 };
 
@@ -195,6 +305,63 @@ exports.Prisma.ReviewScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ProductCategoryScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  icon: 'icon',
+  image: 'image',
+  price: 'price',
+  productId: 'productId',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SponsoredProductScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  price: 'price',
+  discount: 'discount',
+  image: 'image',
+  productId: 'productId',
+  order: 'order',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FlashSaleScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  name: 'name',
+  price: 'price',
+  oldPrice: 'oldPrice',
+  discount: 'discount',
+  image: 'image',
+  itemsLeft: 'itemsLeft',
+  totalItems: 'totalItems',
+  progress: 'progress',
+  active: 'active',
+  endsAt: 'endsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  minPurchase: 'minPurchase',
+  maxDiscount: 'maxDiscount',
+  usageLimit: 'usageLimit',
+  usageCount: 'usageCount',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -209,16 +376,61 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.ReturnStatus = exports.$Enums.ReturnStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED'
+};
 
+exports.CancellationStatus = exports.$Enums.CancellationStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  REFUNDED: 'REFUNDED'
+};
+
+exports.ChatStatus = exports.$Enums.ChatStatus = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+};
+
+exports.ChatPriority = exports.$Enums.ChatPriority = {
+  LOW: 'LOW',
+  NORMAL: 'NORMAL',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT'
+};
+
+exports.MessageSender = exports.$Enums.MessageSender = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
   Product: 'Product',
+  ProductVariant: 'ProductVariant',
+  ProductImage: 'ProductImage',
   Order: 'Order',
   OrderItem: 'OrderItem',
   ReturnRequest: 'ReturnRequest',
+  ReturnItem: 'ReturnItem',
+  OrderCancellation: 'OrderCancellation',
+  ChatConversation: 'ChatConversation',
+  ChatMessage: 'ChatMessage',
+  OrderStatusHistory: 'OrderStatusHistory',
+  AdminUser: 'AdminUser',
   Wishlist: 'Wishlist',
-  Review: 'Review'
+  Review: 'Review',
+  ProductCategory: 'ProductCategory',
+  SponsoredProduct: 'SponsoredProduct',
+  FlashSale: 'FlashSale',
+  Coupon: 'Coupon'
 };
 
 /**

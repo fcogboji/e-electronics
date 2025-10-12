@@ -47,10 +47,9 @@ export const useCartStore = create<CartStore>()(
         set({ items: get().items.filter((i) => i.id !== id) }),
 
      
-      // Clear the entire cart and log for debugging
+      // Clear the entire cart
 clearCart: () => {
   set({ items: [] });
-  console.log('✅ Cart cleared after payment success');
 },
 
 

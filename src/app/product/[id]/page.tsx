@@ -12,6 +12,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const product = await prisma.product.findUnique({
     where: { id },
+    include: {
+      variants: true,
+      images: {
+        orderBy: { order: 'asc' }
+      }
+    }
   });
 
   if (!product) return <div>Product not found</div>;

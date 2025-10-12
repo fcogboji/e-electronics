@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
@@ -13,64 +13,77 @@ const brands = [
     href: "/product-category/brands/samsung",
   },
   {
-    image: "/images/royal.jpg",
-    alt: "Royal",
-    href: "/product-category/brands/royal",
-  },
-  {
-    image: "/images/lg.png",
-    alt: "LG",
-    href: "/product-category/brands/lg",
-  },
-  {
-    image: "/images/panasonic.jpeg",
-    alt: "Panasonic",
-    href: "/product-category/brands/panasonic",
-  },
-  {
     image: "/images/apple.jpeg",
     alt: "Apple",
     href: "/product-category/brands/apple",
   },
+  {
+    image: "/images/xiaomi.jpg",
+    alt: "Xiaomi",
+    href: "/product-category/brands/xiaomi",
+  },
+  {
+    image: "/images/oneplus.jpg",
+    alt: "OnePlus",
+    href: "/product-category/brands/oneplus",
+  },
+  {
+    image: "/images/huawei.jpg",
+    alt: "Huawei",
+    href: "/product-category/brands/huawei",
+  },
+  {
+    image: "/images/oppo.jpg",
+    alt: "Oppo",
+    href: "/product-category/brands/oppo",
+  },
+  {
+    image: "/images/vivo.jpg",
+    alt: "Vivo",
+    href: "/product-category/brands/vivo",
+  },
+  
 ];
 
 export default function BrandCarousel() {
   return (
-    <div className="w-full py-6 px-4 sm:px-6 lg:px-8">
+    <div className="w-full py-3 px-4 sm:px-6 lg:px-8">
       <hr className="border-gray-300" />
-      <Swiper
-        modules={[Autoplay]}
-        autoplay={{
-          delay: 2000,
-          disableOnInteraction: false,
-        }}
-        loop={true}
-        speed={500}
-        slidesPerView={4}
-        slidesPerGroup={1}
-        centeredSlides={false}
-        spaceBetween={20}
-        breakpoints={{
-          320: { slidesPerView: 2, spaceBetween: 10 },
-          768: { slidesPerView: 3 },
-          1024: { slidesPerView: 4 },
-        }}
-      >
-        {brands.map((brand, index) => (
-          <SwiperSlide key={index} className="flex justify-center pl-9">
-            <Link href={brand.href}>
-              <Image
-                src={brand.image}
-                alt={brand.alt}
-                width={150}
-                height={80}
-                className="object-contain cursor-pointer"
-              />
-            </Link>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+      <div className="py-4">
+        <Swiper
+          modules={[Autoplay]}
+          autoplay={{
+            delay: 2000,
+            disableOnInteraction: false,
+          }}
+          loop={true}
+          speed={500}
+          slidesPerView={4}
+          slidesPerGroup={1}
+          centeredSlides={true}
+          spaceBetween={20}
+          breakpoints={{
+            320: { slidesPerView: 2, spaceBetween: 10 },
+            768: { slidesPerView: 3 },
+            1024: { slidesPerView: 4 },
+          }}
+        >
+          {brands.map((brand, index) => (
+            <SwiperSlide key={index} className="flex justify-center items-center">
+              <Link href={brand.href}>
+                <Image
+                  src={brand.image}
+                  alt={brand.alt}
+                  width={120}
+                  height={60}
+                  className="object-contain cursor-pointer"
+                />
+              </Link>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
       <hr className="border-gray-300" />
     </div>
   );
-}
+}*/

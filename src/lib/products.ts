@@ -8,7 +8,6 @@ export async function getProductsByBrand(brand: string) {
     where: {
       brand: {
         equals: brand,
-        mode: "insensitive",
       },
     },
     orderBy: {
@@ -26,7 +25,6 @@ export async function getProductsByCategory(category: string) {
     where: {
       category: {
         equals: category,
-        mode: "insensitive",
       },
     },
     orderBy: {

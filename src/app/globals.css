@@ -60,3 +60,40 @@
 .animate-flash {
   animation: flash 2.5s infinite;
 }
+
+/* Hide scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile touch optimizations */
+@media (max-width: 768px) {
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Better touch targets for small elements */
+  .touch-target {
+    position: relative;
+  }
+
+  .touch-target::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    z-index: -1;
+  }
+}

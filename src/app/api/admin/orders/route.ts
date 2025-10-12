@@ -1,6 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { orderId, status } = body;
+
+    if (!orderId || !status) {
+      return new NextResponse('Missing orderId or status', { status: 400 });
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+    });
+
+    // Create status history record
+    await prisma.orderStatusHistory.create({
+      data: {
+        orderId,
+        oldStatus: updatedOrder.status,
+        newStatus: status,
+        changedBy: 'admin',
+      },
+    });
+
+    return NextResponse.json({ success: true, order: updatedOrder });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
@@ -50,9 +81,7 @@ export async function GET(req: NextRequest) {
       prisma.order.findMany({
         where,
         include: {
-          orderItems: {
-            include: { product: true },
-          },
+          orderItems: true,
           user: {
             select: {
               id: true,
@@ -66,6 +95,30 @@ export async function GET(req: NextRequest) {
       }),
       prisma.order.count({ where }),
     ]);
+
+    // Get all unique product IDs
+    const productIds = [...new Set(ordersRaw.flatMap(order =>
+      order.orderItems.map(item => item.productId)
+    ))];
+
+    // Fetch products for all order items
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        image: true,
+        brand: true,
+        category: true,
+      }
+    });
+
+    // Create product lookup map
+    const productMap = products.reduce((acc, product) => {
+      acc[product.id] = product;
+      return acc;
+    }, {} as Record<string, any>);
 
     // Format orders for frontend
     const orders = ordersRaw.map((order) => {
@@ -85,9 +138,13 @@ export async function GET(req: NextRequest) {
         orderItems: order.orderItems.map((item) => ({
           id: item.id,
           productId: item.productId,
-          name: item.product.name,
+          name: productMap[item.productId]?.name || 'Product Not Found',
           price: item.price,
           quantity: item.quantity,
+          condition: item.condition,
+          storage: item.storage,
+          simType: item.simType,
+          color: item.color,
         })),
         createdAt: order.createdAt,
         shippingAddress: order.shippingAddress,

@@ -5,13 +5,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
 const {
+  PrismaClientKnownRequestError,
+  PrismaClientUnknownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientInitializationError,
+  PrismaClientValidationError,
+  getPrismaClient,
+  sqltag,
+  empty,
+  join,
+  raw,
+  skip,
   Decimal,
+  Debug,
   objectEnumValues,
   makeStrictEnum,
+  Extensions,
+  warnOnce,
+  defineDmmfProperty,
   Public,
   getRuntime,
-  skip
-} = require('./runtime/index-browser.js')
+  createParam,
+} = require('./runtime/wasm-engine-edge.js')
 
 
 const Prisma = {}
@@ -20,79 +35,35 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.9.0
- * Query Engine version: 81e4af48011447c3cc503a190e86995b66d2a28e
+ * Prisma Client JS version: 6.16.3
+ * Query Engine version: bb420e667c1820a8c05a38023385f6cc7ef8e83a
  */
 Prisma.prismaVersion = {
-  client: "6.9.0",
-  engine: "81e4af48011447c3cc503a190e86995b66d2a28e"
+  client: "6.16.3",
+  engine: "bb420e667c1820a8c05a38023385f6cc7ef8e83a"
 }
 
-Prisma.PrismaClientKnownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientKnownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)};
-Prisma.PrismaClientUnknownRequestError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientUnknownRequestError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientRustPanicError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientRustPanicError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientInitializationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientInitializationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.PrismaClientValidationError = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.PrismaClientKnownRequestError = PrismaClientKnownRequestError;
+Prisma.PrismaClientUnknownRequestError = PrismaClientUnknownRequestError
+Prisma.PrismaClientRustPanicError = PrismaClientRustPanicError
+Prisma.PrismaClientInitializationError = PrismaClientInitializationError
+Prisma.PrismaClientValidationError = PrismaClientValidationError
 Prisma.Decimal = Decimal
 
 /**
  * Re-export of sql-template-tag
  */
-Prisma.sql = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`sqltag is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.empty = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`empty is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.join = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`join is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.raw = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`raw is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.sql = sqltag
+Prisma.empty = empty
+Prisma.join = join
+Prisma.raw = raw
 Prisma.validator = Public.validator
 
 /**
 * Extensions
 */
-Prisma.getExtensionContext = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.getExtensionContext is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
-Prisma.defineExtension = () => {
-  const runtimeName = getRuntime().prettyName;
-  throw new Error(`Extensions.defineExtension is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
-In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
-)}
+Prisma.getExtensionContext = Extensions.getExtensionContext
+Prisma.defineExtension = Extensions.defineExtension
 
 /**
  * Shorthand utilities for JSON filtering
@@ -109,10 +80,11 @@ Prisma.NullTypes = {
 
 
 
+
+
 /**
  * Enums
  */
-
 exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
@@ -137,7 +109,36 @@ exports.Prisma.ProductScalarFieldEnum = {
   stock: 'stock',
   createdAt: 'createdAt',
   avgRating: 'avgRating',
-  totalReviews: 'totalReviews'
+  totalReviews: 'totalReviews',
+  isLivePromo: 'isLivePromo',
+  isFeatured: 'isFeatured',
+  isLaptop: 'isLaptop'
+};
+
+exports.Prisma.ProductVariantScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  condition: 'condition',
+  storage: 'storage',
+  simType: 'simType',
+  color: 'color',
+  processor: 'processor',
+  memory: 'memory',
+  stock: 'stock',
+  priceAdjustment: 'priceAdjustment',
+  isAvailable: 'isAvailable',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProductImageScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  imageUrl: 'imageUrl',
+  color: 'color',
+  isPrimary: 'isPrimary',
+  order: 'order',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.OrderScalarFieldEnum = {
@@ -147,6 +148,10 @@ exports.Prisma.OrderScalarFieldEnum = {
   amount: 'amount',
   status: 'status',
   paymentIntentId: 'paymentIntentId',
+  paymentReference: 'paymentReference',
+  paymentChannel: 'paymentChannel',
+  customerEmail: 'customerEmail',
+  paidAt: 'paidAt',
   createdAt: 'createdAt',
   customerName: 'customerName',
   phone: 'phone',
@@ -165,8 +170,15 @@ exports.Prisma.OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
   productId: 'productId',
+  productName: 'productName',
+  productImage: 'productImage',
   quantity: 'quantity',
-  price: 'price'
+  price: 'price',
+  specifications: 'specifications',
+  condition: 'condition',
+  storage: 'storage',
+  simType: 'simType',
+  color: 'color'
 };
 
 exports.Prisma.ReturnRequestScalarFieldEnum = {
@@ -175,6 +187,76 @@ exports.Prisma.ReturnRequestScalarFieldEnum = {
   reason: 'reason',
   details: 'details',
   userId: 'userId',
+  status: 'status',
+  refundAmount: 'refundAmount',
+  approvedBy: 'approvedBy',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ReturnItemScalarFieldEnum = {
+  id: 'id',
+  returnRequestId: 'returnRequestId',
+  productId: 'productId',
+  quantity: 'quantity',
+  reason: 'reason',
+  condition: 'condition'
+};
+
+exports.Prisma.OrderCancellationScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  userId: 'userId',
+  reason: 'reason',
+  details: 'details',
+  status: 'status',
+  refundAmount: 'refundAmount',
+  approvedBy: 'approvedBy',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChatConversationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orderId: 'orderId',
+  subject: 'subject',
+  status: 'status',
+  priority: 'priority',
+  assignedTo: 'assignedTo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChatMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  senderType: 'senderType',
+  content: 'content',
+  attachments: 'attachments',
+  isRead: 'isRead',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.OrderStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  oldStatus: 'oldStatus',
+  newStatus: 'newStatus',
+  changedBy: 'changedBy',
+  notes: 'notes',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.AdminUserScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  role: 'role',
+  isActive: 'isActive',
   createdAt: 'createdAt'
 };
 
@@ -195,6 +277,63 @@ exports.Prisma.ReviewScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ProductCategoryScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  icon: 'icon',
+  image: 'image',
+  price: 'price',
+  productId: 'productId',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SponsoredProductScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  price: 'price',
+  discount: 'discount',
+  image: 'image',
+  productId: 'productId',
+  order: 'order',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FlashSaleScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  name: 'name',
+  price: 'price',
+  oldPrice: 'oldPrice',
+  discount: 'discount',
+  image: 'image',
+  itemsLeft: 'itemsLeft',
+  totalItems: 'totalItems',
+  progress: 'progress',
+  active: 'active',
+  endsAt: 'endsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CouponScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  discountType: 'discountType',
+  discountValue: 'discountValue',
+  minPurchase: 'minPurchase',
+  maxDiscount: 'maxDiscount',
+  usageLimit: 'usageLimit',
+  usageCount: 'usageCount',
+  expiresAt: 'expiresAt',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -209,45 +348,147 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.ReturnStatus = exports.$Enums.ReturnStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED'
+};
 
+exports.CancellationStatus = exports.$Enums.CancellationStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  REFUNDED: 'REFUNDED'
+};
+
+exports.ChatStatus = exports.$Enums.ChatStatus = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+};
+
+exports.ChatPriority = exports.$Enums.ChatPriority = {
+  LOW: 'LOW',
+  NORMAL: 'NORMAL',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT'
+};
+
+exports.MessageSender = exports.$Enums.MessageSender = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
   Product: 'Product',
+  ProductVariant: 'ProductVariant',
+  ProductImage: 'ProductImage',
   Order: 'Order',
   OrderItem: 'OrderItem',
   ReturnRequest: 'ReturnRequest',
+  ReturnItem: 'ReturnItem',
+  OrderCancellation: 'OrderCancellation',
+  ChatConversation: 'ChatConversation',
+  ChatMessage: 'ChatMessage',
+  OrderStatusHistory: 'OrderStatusHistory',
+  AdminUser: 'AdminUser',
   Wishlist: 'Wishlist',
-  Review: 'Review'
+  Review: 'Review',
+  ProductCategory: 'ProductCategory',
+  SponsoredProduct: 'SponsoredProduct',
+  FlashSale: 'FlashSale',
+  Coupon: 'Coupon'
 };
-
 /**
- * This is a stub Prisma Client that will error at runtime if called.
+ * Create the Client
  */
-class PrismaClient {
-  constructor() {
-    return new Proxy(this, {
-      get(target, prop) {
-        let message
-        const runtime = getRuntime()
-        if (runtime.isEdge) {
-          message = `PrismaClient is not configured to run in ${runtime.prettyName}. In order to run Prisma Client on edge runtime, either:
-- Use Prisma Accelerate: https://pris.ly/d/accelerate
-- Use Driver Adapters: https://pris.ly/d/driver-adapters
-`;
-        } else {
-          message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
-        }
-
-        message += `
-If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
-
-        throw new Error(message)
+const config = {
+  "generator": {
+    "name": "client",
+    "provider": {
+      "fromEnvVar": null,
+      "value": "prisma-client-js"
+    },
+    "output": {
+      "value": "/Users/admin/projects/e-electronics/src/generated/prisma",
+      "fromEnvVar": null
+    },
+    "config": {
+      "engineType": "library"
+    },
+    "binaryTargets": [
+      {
+        "fromEnvVar": null,
+        "value": "darwin-arm64",
+        "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "darwin-arm64"
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
       }
-    })
+    ],
+    "previewFeatures": [],
+    "sourceFilePath": "/Users/admin/projects/e-electronics/prisma/schema.prisma",
+    "isCustomOutput": true
+  },
+  "relativeEnvPaths": {
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
+  },
+  "relativePath": "../../../prisma",
+  "clientVersion": "6.16.3",
+  "engineVersion": "bb420e667c1820a8c05a38023385f6cc7ef8e83a",
+  "datasourceNames": [
+    "db"
+  ],
+  "activeProvider": "postgresql",
+  "postinstall": false,
+  "inlineDatasources": {
+    "db": {
+      "url": {
+        "fromEnvVar": "DATABASE_URL",
+        "value": null
+      }
+    }
+  },
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"../src/generated/prisma\"\n  binaryTargets = [\"native\", \"darwin-arm64\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider  = \"postgresql\"\n  url       = env(\"DATABASE_URL\")\n  directUrl = env(\"DIRECT_DATABASE_URL\") // For migrations\n}\n\nmodel User {\n  id     String  @id @default(cuid())\n  email  String  @unique\n  orders Order[] @relation(\"UserOrders\")\n}\n\nmodel Product {\n  id           String   @id @default(cuid())\n  name         String\n  price        Int\n  image        String\n  description  String\n  brand        String\n  category     String\n  discount     Int?\n  stock        Int      @default(0)\n  createdAt    DateTime @default(now())\n  avgRating    Float?\n  totalReviews Int      @default(0)\n  isLivePromo  Boolean  @default(false)\n  isFeatured   Boolean  @default(false)\n  isLaptop     Boolean  @default(false)\n\n  wishlists   Wishlist[]\n  reviews     Review[]\n  orderItems  OrderItem[]\n  returnItems ReturnItem[]\n  variants    ProductVariant[]\n  images      ProductImage[]\n\n  // Performance indexes for common queries\n  @@index([category])\n  @@index([brand])\n  @@index([isFeatured])\n  @@index([isLivePromo])\n  @@index([createdAt])\n  @@index([avgRating])\n  @@index([category, isFeatured])\n  @@index([category, createdAt])\n}\n\nmodel ProductVariant {\n  id              String   @id @default(cuid())\n  productId       String\n  condition       String? // Fair, Good, Excellent, Premium\n  storage         String? // 128 GB, 256 GB, 512 GB, etc\n  simType         String? // eSIM, Physical SIM + eSIM, etc\n  color           String? // Black, Grey, Silver, etc\n  processor       String? // For laptops: Apple M1 Pro, Apple M1 Max, Intel i7, etc\n  memory          String? // For laptops: 16 GB, 32 GB, 64 GB, etc\n  stock           Int      @default(0)\n  priceAdjustment Int      @default(0) // Price adjustment from base price\n  isAvailable     Boolean  @default(true)\n  createdAt       DateTime @default(now())\n  updatedAt       DateTime @updatedAt\n\n  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)\n\n  @@unique([productId, condition, storage, simType, color, processor, memory])\n}\n\nmodel ProductImage {\n  id        String   @id @default(cuid())\n  productId String\n  imageUrl  String\n  color     String? // Associated color for this image\n  isPrimary Boolean  @default(false)\n  order     Int      @default(0)\n  createdAt DateTime @default(now())\n\n  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)\n}\n\nmodel Order {\n  id               String    @id @default(cuid())\n  userId           String? // ✅ optional\n  email            String\n  amount           Float\n  status           String    @default(\"pending\")\n  paymentIntentId  String?\n  paymentReference String?   @unique // Paystack payment reference\n  paymentChannel   String? // Payment channel (card, bank, etc)\n  customerEmail    String? // Customer email from payment\n  paidAt           DateTime? // When payment was confirmed\n  createdAt        DateTime  @default(now())\n\n  customerName     String?\n  phone            String?\n  shippingAddress  String?\n  city             String?\n  state            String?\n  postalCode       String?\n  country          String?\n  shippingProvider String? // ✅ name of the courier (e.g. DHL, GIG)\n  trackingId       String? // ✅ tracking number\n  deliveryEta      DateTime? // ✅ estimated delivery date\n  adminNote        String? // ✅ internal note only admins can see\n\n  user       User?       @relation(\"UserOrders\", fields: [userId], references: [id]) // ✅ optional\n  orderItems OrderItem[]\n\n  // Performance indexes for common queries\n  @@index([userId])\n  @@index([email])\n  @@index([status])\n  @@index([createdAt])\n  @@index([userId, status])\n  @@index([status, createdAt])\n}\n\nmodel OrderItem {\n  id             String  @id @default(cuid())\n  orderId        String\n  productId      String\n  productName    String? // Store product name at time of purchase\n  productImage   String? // Store product image at time of purchase\n  quantity       Int\n  price          Float\n  specifications String? // JSON string of all specifications\n\n  // Product specifications selected by user\n  condition String? // e.g. \"New\", \"Used\", \"Refurbished\"\n  storage   String? // e.g. \"128GB\", \"256GB\", \"512GB\"\n  simType   String? // e.g. \"Single SIM\", \"Dual SIM\", \"eSIM\"\n  color     String? // e.g. \"Black\", \"White\", \"Blue\"\n\n  order   Order   @relation(fields: [orderId], references: [id])\n  product Product @relation(fields: [productId], references: [id])\n}\n\nmodel ReturnRequest {\n  id           String       @id @default(cuid())\n  orderId      String\n  reason       String\n  details      String?\n  userId       String\n  status       ReturnStatus @default(PENDING)\n  refundAmount Float?\n  approvedBy   String?\n  processedAt  DateTime?\n  createdAt    DateTime     @default(now())\n  updatedAt    DateTime     @updatedAt\n\n  returnItems ReturnItem[]\n}\n\nmodel ReturnItem {\n  id              String  @id @default(cuid())\n  returnRequestId String\n  productId       String\n  quantity        Int\n  reason          String\n  condition       String?\n\n  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id])\n  product       Product       @relation(fields: [productId], references: [id])\n}\n\nmodel OrderCancellation {\n  id           String             @id @default(cuid())\n  orderId      String             @unique\n  userId       String\n  reason       String\n  details      String?\n  status       CancellationStatus @default(PENDING)\n  refundAmount Float?\n  approvedBy   String?\n  processedAt  DateTime?\n  createdAt    DateTime           @default(now())\n  updatedAt    DateTime           @updatedAt\n}\n\nmodel ChatConversation {\n  id         String       @id @default(cuid())\n  userId     String\n  orderId    String?\n  subject    String       @default(\"General Inquiry\")\n  status     ChatStatus   @default(OPEN)\n  priority   ChatPriority @default(NORMAL)\n  assignedTo String?\n  createdAt  DateTime     @default(now())\n  updatedAt  DateTime     @updatedAt\n\n  messages ChatMessage[]\n}\n\nmodel ChatMessage {\n  id             String        @id @default(cuid())\n  conversationId String\n  senderId       String\n  senderType     MessageSender\n  content        String\n  attachments    String?\n  isRead         Boolean       @default(false)\n  createdAt      DateTime      @default(now())\n\n  conversation ChatConversation @relation(fields: [conversationId], references: [id])\n}\n\nmodel OrderStatusHistory {\n  id        String   @id @default(cuid())\n  orderId   String\n  oldStatus String?\n  newStatus String\n  changedBy String?\n  notes     String?\n  createdAt DateTime @default(now())\n}\n\nmodel AdminUser {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  name      String\n  role      String   @default(\"admin\")\n  isActive  Boolean  @default(true)\n  createdAt DateTime @default(now())\n}\n\nenum ReturnStatus {\n  PENDING\n  APPROVED\n  REJECTED\n  PROCESSING\n  COMPLETED\n}\n\nenum CancellationStatus {\n  PENDING\n  APPROVED\n  REJECTED\n  REFUNDED\n}\n\nenum ChatStatus {\n  OPEN\n  IN_PROGRESS\n  RESOLVED\n  CLOSED\n}\n\nenum ChatPriority {\n  LOW\n  NORMAL\n  HIGH\n  URGENT\n}\n\nenum MessageSender {\n  USER\n  ADMIN\n  SYSTEM\n}\n\nmodel Wishlist {\n  id        String   @id @default(cuid())\n  userId    String\n  product   Product  @relation(fields: [productId], references: [id])\n  productId String\n  createdAt DateTime @default(now())\n\n  // Performance indexes and constraints\n  @@unique([userId, productId]) // Prevent duplicate wishlist entries\n  @@index([userId])\n  @@index([productId])\n  @@index([createdAt])\n}\n\nmodel Review {\n  id        String   @id @default(cuid())\n  rating    Int\n  comment   String?\n  userId    String\n  productId String\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)\n\n  @@unique([userId, productId])\n  @@map(\"reviews\")\n}\n\nmodel ProductCategory {\n  id        String   @id @default(cuid())\n  title     String\n  icon      String\n  image     String\n  price     String?\n  productId String?\n  order     Int      @default(0)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel SponsoredProduct {\n  id        String   @id @default(cuid())\n  title     String\n  price     String\n  discount  String?\n  image     String\n  productId String?\n  order     Int      @default(0)\n  active    Boolean  @default(true)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel FlashSale {\n  id         String   @id @default(cuid())\n  productId  String\n  name       String\n  price      String\n  oldPrice   String?\n  discount   String?\n  image      String\n  itemsLeft  Int\n  totalItems Int\n  progress   Int\n  active     Boolean  @default(true)\n  endsAt     DateTime\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n}\n\nmodel Coupon {\n  id            String    @id @default(cuid())\n  code          String    @unique\n  discountType  String // \"percentage\" or \"fixed\"\n  discountValue Int // Percentage (1-100) or fixed amount in kobo\n  minPurchase   Int? // Minimum purchase amount in kobo\n  maxDiscount   Int? // Maximum discount amount in kobo (for percentage)\n  usageLimit    Int? // Total number of times can be used\n  usageCount    Int       @default(0)\n  expiresAt     DateTime?\n  isActive      Boolean   @default(true)\n  createdAt     DateTime  @default(now())\n  updatedAt     DateTime  @updatedAt\n\n  @@map(\"coupons\")\n}\n",
+  "inlineSchemaHash": "b68c702162178b246e6c815aedbe60a3c1d242e12e0ed7d8f4407dde2669da27",
+  "copyEngine": true
+}
+config.dirname = '/'
+
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orders\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"UserOrders\"}],\"dbName\":null},\"Product\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"brand\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"category\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"discount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"stock\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"avgRating\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"totalReviews\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"isLivePromo\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"isFeatured\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"isLaptop\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"wishlists\",\"kind\":\"object\",\"type\":\"Wishlist\",\"relationName\":\"ProductToWishlist\"},{\"name\":\"reviews\",\"kind\":\"object\",\"type\":\"Review\",\"relationName\":\"ProductToReview\"},{\"name\":\"orderItems\",\"kind\":\"object\",\"type\":\"OrderItem\",\"relationName\":\"OrderItemToProduct\"},{\"name\":\"returnItems\",\"kind\":\"object\",\"type\":\"ReturnItem\",\"relationName\":\"ProductToReturnItem\"},{\"name\":\"variants\",\"kind\":\"object\",\"type\":\"ProductVariant\",\"relationName\":\"ProductToProductVariant\"},{\"name\":\"images\",\"kind\":\"object\",\"type\":\"ProductImage\",\"relationName\":\"ProductToProductImage\"}],\"dbName\":null},\"ProductVariant\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"condition\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"storage\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"simType\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"color\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"processor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"memory\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"stock\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"priceAdjustment\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"isAvailable\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToProductVariant\"}],\"dbName\":null},\"ProductImage\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"imageUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"color\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isPrimary\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"order\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToProductImage\"}],\"dbName\":null},\"Order\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"amount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"paymentIntentId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"paymentReference\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"paymentChannel\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"customerEmail\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"paidAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"customerName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"shippingAddress\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"city\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"state\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"postalCode\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"shippingProvider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"trackingId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"deliveryEta\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"adminNote\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserOrders\"},{\"name\":\"orderItems\",\"kind\":\"object\",\"type\":\"OrderItem\",\"relationName\":\"OrderToOrderItem\"}],\"dbName\":null},\"OrderItem\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productImage\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"quantity\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"specifications\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"condition\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"storage\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"simType\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"color\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"order\",\"kind\":\"object\",\"type\":\"Order\",\"relationName\":\"OrderToOrderItem\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"OrderItemToProduct\"}],\"dbName\":null},\"ReturnRequest\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"reason\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"details\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"ReturnStatus\"},{\"name\":\"refundAmount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"approvedBy\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"processedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"returnItems\",\"kind\":\"object\",\"type\":\"ReturnItem\",\"relationName\":\"ReturnItemToReturnRequest\"}],\"dbName\":null},\"ReturnItem\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"returnRequestId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"quantity\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"reason\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"condition\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"returnRequest\",\"kind\":\"object\",\"type\":\"ReturnRequest\",\"relationName\":\"ReturnItemToReturnRequest\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToReturnItem\"}],\"dbName\":null},\"OrderCancellation\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"reason\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"details\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"CancellationStatus\"},{\"name\":\"refundAmount\",\"kind\":\"scalar\",\"type\":\"Float\"},{\"name\":\"approvedBy\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"processedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"ChatConversation\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"subject\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"ChatStatus\"},{\"name\":\"priority\",\"kind\":\"enum\",\"type\":\"ChatPriority\"},{\"name\":\"assignedTo\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"messages\",\"kind\":\"object\",\"type\":\"ChatMessage\",\"relationName\":\"ChatConversationToChatMessage\"}],\"dbName\":null},\"ChatMessage\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"conversationId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"senderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"senderType\",\"kind\":\"enum\",\"type\":\"MessageSender\"},{\"name\":\"content\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"attachments\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isRead\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"conversation\",\"kind\":\"object\",\"type\":\"ChatConversation\",\"relationName\":\"ChatConversationToChatMessage\"}],\"dbName\":null},\"OrderStatusHistory\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"orderId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"oldStatus\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"newStatus\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"changedBy\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"notes\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"AdminUser\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Wishlist\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToWishlist\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Review\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"rating\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"comment\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"product\",\"kind\":\"object\",\"type\":\"Product\",\"relationName\":\"ProductToReview\"}],\"dbName\":\"reviews\"},\"ProductCategory\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"icon\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"order\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"SponsoredProduct\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"discount\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"order\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"active\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"FlashSale\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"productId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"price\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"oldPrice\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"discount\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"itemsLeft\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"totalItems\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"progress\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"active\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"endsAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Coupon\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"discountType\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"discountValue\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"minPurchase\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"maxDiscount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"usageLimit\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"usageCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"isActive\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":\"coupons\"}},\"enums\":{},\"types\":{}}")
+defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
+config.engineWasm = {
+  getRuntime: async () => require('./query_engine_bg.js'),
+  getQueryEngineWasmModule: async () => {
+    const loader = (await import('#wasm-engine-loader')).default
+    const engine = (await loader).default
+    return engine
   }
 }
+config.compilerWasm = undefined
 
+config.injectableEdgeEnv = () => ({
+  parsed: {
+    DATABASE_URL: typeof globalThis !== 'undefined' && globalThis['DATABASE_URL'] || typeof process !== 'undefined' && process.env && process.env.DATABASE_URL || undefined
+  }
+})
+
+if (typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined) {
+  Debug.enable(typeof globalThis !== 'undefined' && globalThis['DEBUG'] || typeof process !== 'undefined' && process.env && process.env.DEBUG || undefined)
+}
+
+const PrismaClient = getPrismaClient(config)
 exports.PrismaClient = PrismaClient
-
 Object.assign(exports, Prisma)
+

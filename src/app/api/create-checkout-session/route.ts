@@ -1,12 +1,8 @@
 // File: /app/api/create-checkout-session/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
+import { env } from '@/lib/env';
 
 interface CartItem {
   id: string;
@@ -30,9 +26,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'You must be signed in to checkout.' }, { status: 401 });
     }
 
-    // ✅ Validate user ID exists and is not empty
+    // Validate user ID exists and is not empty
     if (!user.id || user.id.trim() === '') {
-      console.error('❌ Invalid user ID:', user.id);
       return NextResponse.json({ error: 'Invalid user session' }, { status: 401 });
     }
 
@@ -53,22 +48,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const lineItems = cartItems.map((item) => {
-      const price = item.discount
-        ? item.price * (1 - item.discount / 100)
-        : item.price;
-      
-      return {
-        price_data: {
-        currency: 'GBP',
-        product_data: { name: item.name },
-        unit_amount: price, // ✅ ALREADY in pence
-},
-
-        quantity: item.quantity,
-      };
-    });
-
     const totalAmount = cartItems.reduce((sum, item) => {
       const price = item.discount
         ? item.price * (1 - item.discount / 100)
@@ -76,40 +55,40 @@ export async function POST(req: NextRequest) {
       return sum + price * item.quantity;
     }, 0);
 
-    // ✅ Ensure all required fields are properly set
-    const metadata = {
-      cartItems: JSON.stringify(cartItems),
-      totalAmount: totalAmount.toFixed(2),
-      customerEmail: customerInfo?.email ?? user.emailAddresses?.[0]?.emailAddress ?? '',
-      customerName: customerInfo?.name ?? `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-      customerPhone: customerInfo?.phone ?? '',
-      userId: user.id, // ✅ Already validated above
-      clerkUserId: user.id, // ✅ Add explicit clerk user ID for webhook
-    };
-
-    // ✅ Log metadata for debugging
-    console.log('✅ Creating checkout session with metadata:', {
-      userId: metadata.userId,
-      customerEmail: metadata.customerEmail,
-      totalAmount: metadata.totalAmount
-    });
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      line_items: lineItems,
-      success_url: `${req.nextUrl.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.nextUrl.origin}/cart`,
-      customer_email: customerInfo?.email || user.emailAddresses?.[0]?.emailAddress,
-      shipping_address_collection: {
-        allowed_countries: ['NG', 'US', 'GB', 'CA']
+    // Initialize Paystack transaction
+    const paystackResponse = await fetch('https://api.paystack.co/transaction/initialize', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json',
       },
-      metadata,
+      body: JSON.stringify({
+        email: customerInfo?.email || user.emailAddresses?.[0]?.emailAddress,
+        amount: Math.round(totalAmount * 100), // Convert to kobo/cents
+        currency: 'GBP',
+        metadata: {
+          cartItems: JSON.stringify(cartItems),
+          totalAmount: totalAmount.toFixed(2),
+          customerEmail: customerInfo?.email ?? user.emailAddresses?.[0]?.emailAddress ?? '',
+          customerName: customerInfo?.name ?? `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          customerPhone: customerInfo?.phone ?? '',
+          userId: user.id,
+          clerkUserId: user.id,
+        },
+        callback_url: `${req.nextUrl.origin}/success`,
+        cancel_action: `${req.nextUrl.origin}/cart`,
+      }),
     });
 
-    return NextResponse.json({ sessionUrl: session.url });
+    const paystackData = await paystackResponse.json();
+
+    if (!paystackData.status) {
+      throw new Error(paystackData.message || 'Failed to initialize payment');
+    }
+
+    return NextResponse.json({ sessionUrl: paystackData.data.authorization_url });
   } catch (error) {
-    console.error('❌ create-checkout-session error:', error);
+    console.error('Checkout session creation error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

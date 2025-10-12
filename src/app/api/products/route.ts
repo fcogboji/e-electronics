@@ -12,10 +12,10 @@ export async function GET(req: Request) {
       where: query
         ? {
             OR: [
-              { name: { contains: query, mode: 'insensitive' } },
-              { brand: { contains: query, mode: 'insensitive' } },
-              { category: { contains: query, mode: 'insensitive' } },
-              { description: { contains: query, mode: 'insensitive' } },
+              { name: { contains: query } },
+              { brand: { contains: query } },
+              { category: { contains: query } },
+              { description: { contains: query } },
             ],
           }
         : undefined, // If no query, return all products
@@ -41,6 +41,11 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const { userId } = await auth();
+
+    if (!userId) {
+      console.error('❌ No user ID found');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     if (userId !== process.env.NEXT_PUBLIC_ADMIN_ID) {
       console.error('❌ Unauthorized user:', userId);

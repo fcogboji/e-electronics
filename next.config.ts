@@ -1,24 +1,79 @@
-// next.config.ts
 import { NextConfig } from 'next';
 
-// next.config.js
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // Temporarily disable for build
+  },
+  typescript: {
+    ignoreBuildErrors: false, // Fail builds on TypeScript errors
   },
   images: {
-    domains: [
-      'www.mamasandpapas.com',
-      'files.stripe.com',
-      'res.cloudinary.com',
-      'images.macrumors.com',
-      'm.media-amazon.com', // ✅ Add this line
-      "i5.walmartimages.com",
-      "images.samsung.com" 
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.mamasandpapas.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'files.stripe.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.macrumors.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i5.walmartimages.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.samsung.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn3.gstatic.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'encrypted-tbn2.gstatic.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ee.co.uk',
+      },
     ],
+  },
+  serverExternalPackages: ['@prisma/client'],
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

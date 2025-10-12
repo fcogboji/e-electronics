@@ -1,0 +1,6 @@
+node_modules
+.next
+src/generated
+*.js
+scripts/migrate-orders.ts
+prisma/seed.ts
