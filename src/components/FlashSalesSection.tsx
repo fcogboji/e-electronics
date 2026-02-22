@@ -65,10 +65,10 @@ export default function FlashSalesSection() {
 
   const fetchFlashSales = async () => {
     try {
-      const res = await fetch('/api/admin/flash-sales');
+      const res = await fetch('/api/flash-sales');
       const data = await res.json();
-      // Filter for active sales AND products that exist
-      const activeFlashSales = data.filter((sale: FlashSale) => sale.active && sale.productExists !== false);
+      // The public API already returns only active sales with existing products
+      const activeFlashSales = Array.isArray(data) ? data : [];
       setFlashSales(activeFlashSales);
 
       // Calculate time left based on first active flash sale
@@ -233,9 +233,17 @@ export default function FlashSalesSection() {
                   {product.name}
                 </h3>
                 <div className="mb-2 sm:mb-3">
-                  <p className="text-sm sm:text-lg md:text-2xl font-bold text-gray-900">₦ {product.price}</p>
+                  <p className="text-sm sm:text-lg md:text-2xl font-bold text-gray-900">
+                    ₦ {typeof product.price === 'string' && product.price.includes(',')
+                      ? product.price
+                      : Number(product.price).toLocaleString()}
+                  </p>
                   {product.oldPrice && (
-                    <p className="text-xs sm:text-sm text-gray-400 line-through">₦ {product.oldPrice}</p>
+                    <p className="text-xs sm:text-sm text-gray-400 line-through">
+                      ₦ {typeof product.oldPrice === 'string' && product.oldPrice.includes(',')
+                        ? product.oldPrice
+                        : Number(product.oldPrice).toLocaleString()}
+                    </p>
                   )}
                 </div>
                 <div>

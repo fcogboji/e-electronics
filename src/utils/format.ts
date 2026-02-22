@@ -2,6 +2,11 @@
 export const formatAmount = (amount: number): string =>
   `₦${(amount / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 
+export const formatPrice = (price: string | number): string => {
+  const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+  return numPrice.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
 export const formatDate = (date: string | Date): string =>
   new Date(date).toLocaleDateString('en-NG', {
     day: '2-digit',

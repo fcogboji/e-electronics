@@ -4,11 +4,21 @@ import Pusher from "pusher";
 
 import { NextApiRequest, NextApiResponse } from "next";
 
+// Validate Pusher environment variables
+const pusherAppId = process.env.PUSHER_APP_ID;
+const pusherKey = process.env.PUSHER_KEY;
+const pusherSecret = process.env.PUSHER_SECRET;
+const pusherCluster = process.env.PUSHER_CLUSTER || "eu";
+
+if (!pusherAppId || !pusherKey || !pusherSecret) {
+  console.error("Missing Pusher environment variables");
+}
+
 const pusher = new Pusher({
-    appId: "1994171",
-    key: "303aa87a9066d95314c5",
-    secret: "8f4d373dc1a93f10eb49",
-    cluster: "eu",
+    appId: pusherAppId || "",
+    key: pusherKey || "",
+    secret: pusherSecret || "",
+    cluster: pusherCluster,
     useTLS: true,
   });
   

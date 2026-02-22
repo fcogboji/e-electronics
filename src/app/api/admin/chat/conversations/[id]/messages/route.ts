@@ -3,15 +3,15 @@ import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
 import { sendChatResponseNotification } from '@/lib/email';
 import { clerkClient } from '@clerk/nextjs/server';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/authMiddleware';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await currentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const { id: conversationId } = await params;
@@ -44,8 +44,8 @@ export async function POST(
 ) {
   try {
     const user = await currentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await verifyAdmin()) || !user) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const { content, attachments } = await req.json();

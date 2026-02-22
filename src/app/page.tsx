@@ -7,7 +7,6 @@ import ProductGrid from '@/components/ProductGrid';
 import LivePromotionsCarousel from '@/components/LivePromotionsCarousel';
 import TrendingCarousel from '@/components/TrendingCarousel';
 import LaptopsCarousel from '@/components/LaptopsCarousel';
-import ProductCategories from '@/components/ProductCategories';
 import FlashSalesSection from '@/components/FlashSalesSection';
 import HowItWorks from '@/components/HowItWorks';
 import CustomerTestimonials from '@/components/CustomerTestimonials';
@@ -64,8 +63,6 @@ export default async function HomePage() {
       {laptopProducts.length > 0 && (
         <LaptopsCarousel products={laptopProducts} />
       )}
-
-      <ProductCategories />
 
       <div id="products-section">
         <ProductGrid

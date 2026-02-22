@@ -5,10 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/stores/cartStore';
 import PaymentMethodsIcons from '@/components/PaymentMethodsIcons';
-import { Tag, X } from 'lucide-react';
+import { Tag, X, ShoppingCart } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useUser } from '@clerk/nextjs';
 
 export default function CartPage() {
+  const { isSignedIn, isLoaded } = useUser();
   const cartItems = useCartStore(state => state.items);
   const removeFromCart = useCartStore(state => state.removeFromCart);
   const increaseQty = useCartStore(state => state.increaseQty);
@@ -17,6 +19,42 @@ export default function CartPage() {
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+
+  // Show loading state while checking authentication
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
+
+  // Require authentication to view cart
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white p-8 rounded-2xl shadow-lg text-center max-w-md">
+          <ShoppingCart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Sign in to view your cart</h2>
+          <p className="text-gray-600 mb-6">
+            Please sign in to access your shopping cart and continue shopping.
+          </p>
+          <Link
+            href="/sign-in"
+            className="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium"
+          >
+            Sign In
+          </Link>
+          <p className="mt-4 text-sm text-gray-500">
+            Don&apos;t have an account?{' '}
+            <Link href="/sign-up" className="text-green-600 hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,

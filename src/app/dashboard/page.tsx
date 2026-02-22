@@ -34,20 +34,6 @@ export default async function AdminDashboard() {
         </Link>
 
         <Link
-          href="/dashboard/categories"
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded hover:from-purple-700 hover:to-indigo-700 transition-colors"
-        >
-          Manage Categories
-        </Link>
-
-        <Link
-          href="/dashboard/sponsored-products"
-          className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded hover:from-amber-600 hover:to-orange-600 transition-colors"
-        >
-          Manage Sponsored Products
-        </Link>
-
-        <Link
           href="/dashboard/flash-sales"
           className="bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 py-2 rounded hover:from-red-700 hover:to-rose-700 transition-colors"
         >

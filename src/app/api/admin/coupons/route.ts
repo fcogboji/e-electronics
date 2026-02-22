@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { currentUser } from '@clerk/nextjs/server';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/authMiddleware';
 
 // Create a new coupon (Admin only)
 export async function POST(request: Request) {
   try {
-    const user = await currentUser();
-
-    // Check if user is admin
-    if (user?.publicMetadata?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const data = await request.json();
@@ -54,12 +51,10 @@ export async function POST(request: Request) {
 }
 
 // Get all coupons (Admin only)
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const user = await currentUser();
-
-    if (user?.publicMetadata?.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const coupons = await prisma.coupon.findMany({

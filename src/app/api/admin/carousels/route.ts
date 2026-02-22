@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/authMiddleware';
 
 // GET - Get carousel assignments for a product
 export async function GET(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const searchParams = request.nextUrl.searchParams;
     const productId = searchParams.get('productId');
 
@@ -58,6 +62,9 @@ export async function GET(request: NextRequest) {
 // POST - Update carousel assignments for a product
 export async function POST(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const body = await request.json();
     const { productId, isLivePromo, isFeatured, isLaptop } = body;
 
@@ -90,6 +97,9 @@ export async function POST(request: NextRequest) {
 // PATCH - Bulk update carousel assignments
 export async function PATCH(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const body = await request.json();
     const { productIds, carouselType, value } = body;
 

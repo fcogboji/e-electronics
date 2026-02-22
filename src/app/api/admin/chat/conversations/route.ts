@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { currentUser } from '@clerk/nextjs/server';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/authMiddleware';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await currentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
     }
-
-    // In production, check if user is admin
-    // For now, allow all authenticated users
 
     const conversations = await prisma.chatConversation.findMany({
       include: {

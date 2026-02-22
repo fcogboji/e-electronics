@@ -76,11 +76,13 @@ export default function FlashSalesPage() {
   const handleProductSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedProduct = products.find(p => p.id === e.target.value);
     if (selectedProduct) {
+      // Convert from kobo to naira (divide by 100)
+      const priceInNaira = (selectedProduct.price / 100).toLocaleString();
       setFormData({
         ...formData,
         productId: selectedProduct.id,
         name: selectedProduct.name,
-        price: selectedProduct.price.toLocaleString(),
+        price: priceInNaira,
         image: selectedProduct.image,
         itemsLeft: selectedProduct.stock.toString(),
         totalItems: selectedProduct.stock.toString()
@@ -232,7 +234,7 @@ export default function FlashSalesPage() {
                 <option value="">-- Select a product to auto-fill details --</option>
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
-                    {product.name} - ₦{product.price.toLocaleString()} ({product.stock} in stock)
+                    {product.name} - ₦{(product.price / 100).toLocaleString()} ({product.stock} in stock)
                   </option>
                 ))}
               </select>
@@ -393,8 +395,18 @@ export default function FlashSalesPage() {
                   />
                 </td>
                 <td className="px-6 py-4 text-sm">{sale.name}</td>
-                <td className="px-6 py-4 text-sm">₦ {sale.price}</td>
-                <td className="px-6 py-4 text-sm">{sale.oldPrice ? `₦ ${sale.oldPrice}` : '-'}</td>
+                <td className="px-6 py-4 text-sm">
+                  ₦ {typeof sale.price === 'string' && sale.price.includes(',')
+                    ? sale.price
+                    : Number(sale.price).toLocaleString()}
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  {sale.oldPrice
+                    ? `₦ ${typeof sale.oldPrice === 'string' && sale.oldPrice.includes(',')
+                        ? sale.oldPrice
+                        : Number(sale.oldPrice).toLocaleString()}`
+                    : '-'}
+                </td>
                 <td className="px-6 py-4 text-sm">{sale.discount || '-'}</td>
                 <td className="px-6 py-4 text-sm">{sale.itemsLeft}</td>
                 <td className="px-6 py-4 text-sm">

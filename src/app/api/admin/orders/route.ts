@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
+
+const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID;
 
 export async function PATCH(req: NextRequest) {
   try {
+    // Verify admin authentication
+    const { userId } = await auth();
+    if (!userId || userId !== ADMIN_ID) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const { orderId, status } = body;
 
@@ -33,6 +42,12 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // Verify admin authentication
+  const { userId } = await auth();
+  if (!userId || userId !== ADMIN_ID) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url);
 
   // Extract pagination values

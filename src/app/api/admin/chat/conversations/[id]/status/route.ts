@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/authMiddleware';
 
 export async function PATCH(
   req: NextRequest,
@@ -8,8 +9,8 @@ export async function PATCH(
 ) {
   try {
     const user = await currentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await verifyAdmin()) || !user) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const { status } = await req.json();

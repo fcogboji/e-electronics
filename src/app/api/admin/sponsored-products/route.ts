@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/authMiddleware';
 
 // GET all sponsored products
 export async function GET() {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const sponsoredProducts = await prisma.sponsoredProduct.findMany({
       orderBy: { order: 'asc' },
     });
@@ -35,6 +39,9 @@ export async function GET() {
 // POST new sponsored product
 export async function POST(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const body = await request.json();
     const { title, price, discount, image, productId, order, active } = body;
 
@@ -64,6 +71,9 @@ export async function POST(request: NextRequest) {
 // PUT update sponsored product
 export async function PUT(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const body = await request.json();
     const { id, title, price, discount, image, productId, order, active } = body;
 
@@ -94,6 +104,9 @@ export async function PUT(request: NextRequest) {
 // DELETE sponsored product
 export async function DELETE(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

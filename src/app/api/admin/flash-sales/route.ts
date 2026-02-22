@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifyAdmin, unauthorizedResponse } from '@/lib/authMiddleware';
 
 export async function GET() {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const flashSales = await prisma.flashSale.findMany({
       orderBy: { createdAt: 'desc' }
     });
@@ -35,6 +39,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const body = await request.json();
 
     const flashSale = await prisma.flashSale.create({
@@ -65,6 +72,9 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const body = await request.json();
     const { id, ...updateData } = body;
 
@@ -104,6 +114,9 @@ export async function PUT(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const body = await request.json();
     const { id, ...updateData } = body;
 
@@ -134,6 +147,9 @@ export async function PATCH(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    if (!(await verifyAdmin())) {
+      return unauthorizedResponse('Admin access required');
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
